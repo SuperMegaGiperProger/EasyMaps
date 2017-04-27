@@ -2,9 +2,7 @@ program Project1;
 
 uses
   Forms,
-  Unit1 in 'Unit1.pas' {Form1},
-  calculating in 'calculating.pas',
-  list in 'list.pas';
+  Unit1 in 'Unit1.pas' {Form1};
 
 {$R *.res}
 

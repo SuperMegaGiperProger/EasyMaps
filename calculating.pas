@@ -4,10 +4,11 @@ interface
 
 uses
   list in 'list.pas'
-  
+
 type
   TVertex = record
-    x, y: integer;
+    latitude, longtitude: extended; //широта, долгота
+    goList: TList; //вершины, в которые можно пойти
 
   end;
 
