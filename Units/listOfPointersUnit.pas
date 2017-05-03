@@ -1,4 +1,4 @@
-unit listOfPointers;
+unit listOfPointersUnit;
 
 //----------------------------------------------------------------------------//
 
@@ -50,5 +50,7 @@ procedure clear(var list: TListOfPointers);
 begin
   while not isEmpty(list) do pop_top(list);
 end;
+
+//----------------------------------------------------------------------------//
 
 end.
