@@ -15,6 +15,7 @@ type
 procedure push_top(var list: TListOfPointers; data: Pointer);
 procedure pop_top(var list: TListOfPointers);
 function isEmpty(var list: TListOfPointers): boolean;
+procedure clear(var list: TListOfPointers);
 
 //----------------------------------------------------------------------------//
 
@@ -43,6 +44,11 @@ end;
 function isEmpty(var list: TListOfPointers): boolean;
 begin
   isEmpty := (list = nil);
+end;
+
+procedure clear(var list: TListOfPointers);
+begin
+  while not isEmpty(list) do pop_top(list);
 end;
 
 end.
