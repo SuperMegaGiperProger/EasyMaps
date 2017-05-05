@@ -14,21 +14,38 @@ type
     distation: real;  // distation to some vertex
   end;
   TVertexPt = ^TVertex;
+  TMovingType = (plane, car, foot);
   TEdge = record
     road: TRoadGraph;
     weight: real;
+    movingType: TMovingType;
     endPoint: TVertexPt;
   end;
+  TEdgePt = ^TEdge;
   TGraphList = TListOfPointers;  // list of TVertex
 
 var
   mapGraph: TGraphList = nil;
 
-procedure createVertex(latitude, longitude: real);
+function createVertex(latitude, longitude: real): TVertexPt;
+function createEdge(var list: TListOfPointers; weight: real; movingTYpe: TMovingType; endPoint: TVertexPt): TEdgePt;
 
 //----------------------------------------------------------------------------//
 
 implementation
+
+
+function createEdge(var list: TListOfPointers; weight: real; movingTYpe: TMovingType; endPoint: TVertexPt): TEdgePt;
+var
+  newE: TEdgePt;
+begin
+  new(newE);
+  newE^.weight := weight;
+  newE^.movingType := movingType;
+  newE^.endPoint := endPoint;
+  push_top(list, newE);
+  result := newE;
+end;
 
 function compareVertices(a, b: Pointer): boolean;
 begin
@@ -38,16 +55,17 @@ begin
     result := (TVertexPt(a)^.latitude < TVertexPt(b)^.latitude);
 end;
 
-procedure createVertex(latitude, longitude: real);
+function createVertex(latitude, longitude: real): TVertexPt;
 var
   newV: TVertexPt;
 begin
   new(newV);
-  newV.latitude := latitude;
-  newV.longitude := longitude;
-  newV.edgesList := nil;
+  newV^.latitude := latitude;
+  newV^.longitude := longitude;
+  newV^.edgesList := nil;
   push_top(mapGraph, newV);
-  //push(mapGraph, compareVerticies);
+  result := newV;
+  //push(mapGraph, newV, compareVertices);
 end;
 
 //----------------------------------------------------------------------------//

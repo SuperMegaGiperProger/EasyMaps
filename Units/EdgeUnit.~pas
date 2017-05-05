@@ -4,16 +4,15 @@ unit EdgeUnit;
 
 interface
 
+uses
+  listOfPointersUnit;
+
 type
-  TMovingType = (car, plane, foot);
   TRoadVertex = record
     latitude, longitude: real;
   end;
-  TRoad = record
-    movingType: TMovingType;
-    weight: real;
-    roadGraph: listOfPointers;  // list of TRoadVertex
-  end;
+  TRoadVertexPt = ^TRoadVertex;
+  TRoadGraph = TListOfPointers;  // list of TRoadVertex
 
 //----------------------------------------------------------------------------//
 

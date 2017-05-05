@@ -23,7 +23,6 @@ procedure push(var list: TListOfPointers; data: pointer; compare: TCompare);
 
 implementation
 
-
 procedure push(var list: TListOfPointers; data: pointer; compare: TCompare);
 var
   it: TEltPt;

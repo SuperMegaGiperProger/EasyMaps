@@ -19,6 +19,12 @@ object Form1: TForm1
     Width = 1025
     Height = 489
   end
+  object Shape1: TShape
+    Left = 56
+    Top = 80
+    Width = 41
+    Height = 145
+  end
   object BitBtn1: TBitBtn
     Left = 176
     Top = 32
