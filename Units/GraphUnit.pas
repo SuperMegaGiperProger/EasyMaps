@@ -1,21 +1,28 @@
 unit GraphUnit;
 
+//----------------------------------------------------------------------------//
+
 interface
 
 uses
-  listOfPointersUnit;
+  listOfPointersUnit, EdgeUnit;
 
 type
   TVertex = record
-    latitude, longitude: real; // широта, долгота
-    goList: TListOfPointers;   // вершины, в которые есть ребро
+    latitude, longitude: real;
+    edgesList: TListOfPointers;  // list of TEdge
+    distation: real;  // distation to some vertex
   end;
-  TEdge = record
-    movingType: (car, plane, foot);
-    weight: real;              
-  end;
-  TGraphList = TListOfPointers;
+  TVertexPt = ^TVertex;
+  TGraphList = TListOfPointers;  // list of TVertex
+
+procedure createVertex(latitude, longitude: real; edgesList: TListOfPointers);
+function
+
+//----------------------------------------------------------------------------//
 
 implementation
+
+//----------------------------------------------------------------------------//
 
 end.

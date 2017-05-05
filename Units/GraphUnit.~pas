@@ -1,21 +1,32 @@
 unit GraphUnit;
 
+//----------------------------------------------------------------------------//
+
 interface
 
 uses
-  listOfPointersUnit;
+  listOfPointersUnit, EdgeUnit;
 
 type
   TVertex = record
-    latitude, longitude: real; // широта, долгота
-    goList: TListOfPointers;   // вершины, в которые есть ребро
+    latitude, longitude: real;
+    edgesList: TListOfPointers;
   end;
-  TEdge = record
-    movingType: (car, plane, foot);
-    weight: real;              
-  end;
+  TVertexPt = ^TVertex;
   TGraphList = TListOfPointers;
+  TWayVertex = record
+    vPt: TVertexPt;
+
+  end;
+
+procedure createVertex(latitude, longitude: real; edgesList: TListOfPointers);
+function bfs(start: TVertexPt; movingTypeSet: set of TMovingType): TListOfPointer;  // list of visited vertices
+function
+
+//----------------------------------------------------------------------------//
 
 implementation
+
+//----------------------------------------------------------------------------//
 
 end.
