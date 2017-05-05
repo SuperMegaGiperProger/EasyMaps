@@ -3,7 +3,8 @@ program EasyMaps;
 uses
   Forms,
   DrawUnit in 'Units\DrawUnit.pas' {Form1},
-  GraphUnit in 'Units\GraphUnit.pas';
+  GraphUnit in 'Units\GraphUnit.pas',
+  listOfPointersUnit in 'Units\listOfPointersUnit.pas';
 
 {$R *.res}
 

@@ -2,7 +2,8 @@ program EasyMaps;
 
 uses
   Forms,
-  DrawUnit in 'Units\DrawUnit.pas' {Form1};
+  DrawUnit in 'Units\DrawUnit.pas' {Form1},
+  GraphUnit in 'Units\GraphUnit.pas';
 
 {$R *.res}
 
