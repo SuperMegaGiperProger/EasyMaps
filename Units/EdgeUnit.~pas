@@ -9,10 +9,9 @@ type
   TRoadVertex = record
     latitude, longitude: real;
   end;
-  TEdge = record
+  TRoad = record
     movingType: TMovingType;
     weight: real;
-    endPoint: TVertexPt;
     roadGraph: listOfPointers;  // list of TRoadVertex
   end;
 
