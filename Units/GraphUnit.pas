@@ -7,12 +7,14 @@ uses
 
 type
   TVertex = record
-    latitude, longitude: real; // широта, долгота
-    goList: TListOfPointers;   // вершины, в которые есть ребро
+    latitude, longitude: real;  // широта, долгота
+    edgesList: TListOfPointers;  // ребра из данной вершины
   end;
+  TVertexPt = ^TVertex;
   TEdge = record
     movingType: (car, plane, foot);
-    weight: real;              
+    weight: real;  // вес ребра
+    endPoint: TVertexPt;  // вершина, в которую ведет это ребро
   end;
   TGraphList = TListOfPointers;
 
