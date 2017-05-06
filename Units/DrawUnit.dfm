@@ -1,6 +1,6 @@
 object Form1: TForm1
-  Left = -4
-  Top = 409
+  Left = 232
+  Top = 160
   Width = 1305
   Height = 675
   Caption = 'EasyMaps'
@@ -18,6 +18,7 @@ object Form1: TForm1
     Top = 104
     Width = 1025
     Height = 489
+    OnMouseUp = mapImageMouseUp
   end
   object Shape1: TShape
     Left = 56

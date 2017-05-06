@@ -28,14 +28,14 @@ var
   mapGraph: TGraphList = nil;
 
 function createVertex(latitude, longitude: real): TVertexPt;
-function createEdge(var list: TListOfPointers; weight: real; movingTYpe: TMovingType; endPoint: TVertexPt);
+function createEdge(var list: TListOfPointers; weight: real; movingTYpe: TMovingType; endPoint: TVertexPt): TEdgePt;
 
 //----------------------------------------------------------------------------//
 
 implementation
 
 
-function createEdge(var list: TListOfPointers; weight: real; movingTYpe: TMovingType; endPoint: TVertexPt);
+function createEdge(var list: TListOfPointers; weight: real; movingTYpe: TMovingType; endPoint: TVertexPt): TEdgePt;
 var
   newE: TEdgePt;
 begin
@@ -44,6 +44,7 @@ begin
   newE^.movingType := movingType;
   newE^.endPoint := endPoint;
   push_top(list, newE);
+  result := newE;
 end;
 
 function compareVertices(a, b: Pointer): boolean;
