@@ -11,9 +11,11 @@ type
     mapImage: TImage;
     BitBtn1: TBitBtn;
     Shape1: TShape;
+    BitBtn2: TBitBtn;
     procedure BitBtn1Click(Sender: TObject);
     procedure mapImageMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
+    procedure BitBtn2Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -21,8 +23,8 @@ type
   end;
 
 const
-  STANDART_RADIUS = 0.0005;
-  STANDART_WIDTH = 0.0005;
+  STANDART_RADIUS = 0.00015;
+  STANDART_WIDTH = 0.0001;
 
 var
   Form1: TForm1;
@@ -69,13 +71,13 @@ begin
   end;
 end;
 
-procedure drawRoad(list: TListOfPointers; style: TPenStyle);
+procedure drawRoad(list: TListOfPointers; style: TPenStyle; w: integer);
 var
   it: TEltPt;
   x, y: integer;
 begin
   it := list;
-  Form1.mapImage.Canvas.Pen.Width := round(STANDART_WIDTH / scale);
+  Form1.mapImage.Canvas.Pen.Width := round(STANDART_WIDTH / scale) * w;
   Form1.mapImage.Canvas.Pen.Style := style;
   with TRoadVertexPt(it^.data)^ do
   begin
@@ -109,8 +111,8 @@ begin
   begin
     with TEdgePt(it^.data)^ do
       case movingType of
-        car: drawRoad(road, psSolid);
-        foot: drawRoad(road, psDot);
+        car: drawRoad(road, psSolid, 2);
+        foot: drawRoad(road, psDot, 1);
       end;
     it := it^.next;
   end;
@@ -164,18 +166,56 @@ begin
   result := closestVert;
 end;
 
+var
+  start: TVertexPt;
+
+procedure drawTheShortiestWay(s, f: TVertexPt; movingTypeSet: TMovingTypeSet);
+var
+  it: TVertexPt;
+  it2: TEltPt;
+begin
+  if not getTheShortiestWay(s, f, movingTypeSet) then
+  begin
+    showMessage('ѕуть не найден..');
+    exit;
+  end;
+  Form1.mapImage.Canvas.Brush.Color := clGreen;
+  Form1.mapImage.Canvas.Pen.Color := clGreen;
+  it := f;
+  while it^.parent <> nil do
+  begin
+    it2 := it^.parent^.edgesList;
+    while (it2 <> nil) and (TEdgePt(it2^.data)^.endPoint <> it) do
+      it2 := it2^.next;
+    if (it2 = nil) or (TEdgePt(it2^.data)^.endPoint <> it) then
+    begin
+      showMessage('Output error');
+      exit;
+    end;
+    drawRoad(TEdgePt(it2^.data)^.road, psDot, 2);
+    it := it^.parent;
+  end;
+end;
+
 procedure TForm1.mapImageMouseUp(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 var
-  v: TVertex;
+  v: TVertexPt;
 begin
   if isEmpty(mapGraph) then exit;
   //x := x - Form1.mapImage.Left;
   //y := y - Form1.mapImage.Top;
-  v := findClosestVertex(x, y)^;
+  v := findClosestVertex(x, y);
   Form1.mapImage.Canvas.Brush.Color := clBlue;
   Form1.mapImage.Canvas.Pen.Color := clBlue;
-  drawVertex(v);
+  drawVertex(v^);
+  if start = nil then start := v
+  else drawTheShortiestWay(start, v, [car, foot]);
+end;
+
+procedure TForm1.BitBtn2Click(Sender: TObject);
+begin
+  start := nil;
 end;
 
 end.
