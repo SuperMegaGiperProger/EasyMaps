@@ -16,10 +16,10 @@ type
     parent: TVertexPt;  // vertex from which we came
     used: boolean;  // flag
   end;
-  TMovingType = (plane, car, foot);
+  TMovingType = (plane, car, foot);  // you can go by foot beside a road
   TMovingTypeSet = set of TMovingType;
   TEdge = record
-    road: TRoadGraph;
+    road: TRoadGraphPt;
     weight: real;  // in meters
     movingType: TMovingType;
     endPoint: TVertexPt;  // end of the edge
@@ -33,8 +33,9 @@ var
   mapGraph: TGraphList = nil;
 
 function createVertex(latitude, longitude: real): TVertexPt;
-function createEdge(var list: TListOfPointers; weight: real;
-  movingTYpe: TMovingType; endPoint: TVertexPt): TEdgePt;
+function createEdge(a, b: TVertexPt; weight: real;
+  movingTYpe: TMovingType; road: TRoadGraphPt = nil;
+  reversible: boolean = false): TEdgePt;
 function psevdoDistation(a, b: TVertex): real;  // "distation" in degrees
 function getTheShortiestWay(s, f: TVertexPt;
   movingTypeSet: TMovingTypeSet = [car, foot, plane]): boolean;
@@ -121,17 +122,25 @@ begin
     (a.longitude - b.longitude) * (a.longitude - b.longitude));
 end;
 
-function createEdge(var list: TListOfPointers; weight: real;
-  movingTYpe: TMovingType; endPoint: TVertexPt): TEdgePt;
+function createEdge(a, b: TVertexPt; weight: real;
+  movingTYpe: TMovingType; road: TRoadGraphPt = nil;
+  reversible: boolean = false): TEdgePt;
 var
   newE: TEdgePt;
 begin
   new(newE);
   newE^.weight := weight;
   newE^.movingType := movingType;
-  newE^.endPoint := endPoint;
-  push_top(list, newE);
+  newE^.endPoint := b;
+  if road = nil then new(newE^.road)
+  else newE^.road := road;
+  newE^.road^ := nil;
+  createRoadVertex(newE^.road^, a^.latitude, a^.longitude);
+  push_top(a^.edgesList, newE);
   result := newE;
+  if reversible then
+    createEdge(b, a, weight, movingType)^.road := newE^.road;
+  if movingType = car then createEdge(a, b, weight, foot, newE^.road, true);
 end;
 
 function compareVertices(a, b: Pointer): boolean;

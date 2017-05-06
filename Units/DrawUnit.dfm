@@ -1,6 +1,6 @@
 object Form1: TForm1
-  Left = 496
-  Top = 315
+  Left = 613
+  Top = 361
   Width = 641
   Height = 675
   Caption = 'EasyMaps'

@@ -111,8 +111,8 @@ begin
   begin
     with TEdgePt(it^.data)^ do
       case movingType of
-        car: drawRoad(road, psSolid, 2);
-        foot: drawRoad(road, psDot, 1);
+        car: drawRoad(road^, psSolid, 2);
+        foot: drawRoad(road^, psDot, 1);
       end;
     it := it^.next;
   end;
@@ -192,7 +192,7 @@ begin
       showMessage('Output error');
       exit;
     end;
-    drawRoad(TEdgePt(it2^.data)^.road, psDot, 2);
+    drawRoad(TEdgePt(it2^.data)^.road^, psDot, 2);
     it := it^.parent;
   end;
 end;
@@ -210,7 +210,7 @@ begin
   Form1.mapImage.Canvas.Pen.Color := clBlue;
   drawVertex(v^);
   if start = nil then start := v
-  else drawTheShortiestWay(start, v, [car, foot]);
+  else drawTheShortiestWay(start, v, [car]);
 end;
 
 procedure TForm1.BitBtn2Click(Sender: TObject);

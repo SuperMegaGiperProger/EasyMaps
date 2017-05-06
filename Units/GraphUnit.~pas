@@ -19,7 +19,7 @@ type
   TMovingType = (plane, car, foot);
   TMovingTypeSet = set of TMovingType;
   TEdge = record
-    road: TRoadGraph;
+    road: TRoadGraphPt;
     weight: real;  // in meters
     movingType: TMovingType;
     endPoint: TVertexPt;  // end of the edge
@@ -33,8 +33,9 @@ var
   mapGraph: TGraphList = nil;
 
 function createVertex(latitude, longitude: real): TVertexPt;
-function createEdge(var list: TListOfPointers; weight: real;
-  movingTYpe: TMovingType; endPoint: TVertexPt): TEdgePt;
+function createEdge(a, b: TVertexPt; weight: real;
+  movingTYpe: TMovingType; road: TRoadGraphPt = nil;
+  reversible: boolean = false): TEdgePt;
 function psevdoDistation(a, b: TVertex): real;  // "distation" in degrees
 function getTheShortiestWay(s, f: TVertexPt;
   movingTypeSet: TMovingTypeSet = [car, foot, plane]): boolean;
@@ -81,14 +82,17 @@ function getTheShortiestWay(s, f: TVertexPt;
 var
   it, edgeIt: TEltPt;
   minV: TVertexPt;  // vertex with min distation
+  infV: TVertex;
 begin
   preparation;
   result := false;
   s^.distation := 0;
+  infV.distation := INF;
+  infV.used := true;
   while not f^.used do
   begin
     it := mapGraph;
-    minV := it^.data;
+    minV := @infV;
     while it <> nil do
     begin
       minDistationVertex(minV, it^.data);
@@ -118,17 +122,25 @@ begin
     (a.longitude - b.longitude) * (a.longitude - b.longitude));
 end;
 
-function createEdge(var list: TListOfPointers; weight: real;
-  movingTYpe: TMovingType; endPoint: TVertexPt): TEdgePt;
+function createEdge(a, b: TVertexPt; weight: real;
+  movingTYpe: TMovingType; road: TRoadGraphPt = nil;
+  reversible: boolean = false): TEdgePt;
 var
   newE: TEdgePt;
 begin
   new(newE);
   newE^.weight := weight;
   newE^.movingType := movingType;
-  newE^.endPoint := endPoint;
-  push_top(list, newE);
+  newE^.endPoint := b;
+  if road = nil then new(newE^.road)
+  else newE^.road := road;
+  newE^.road^ := nil;
+  createRoadVertex(newE^.road^, a^.latitude, a^.longitude);
+  push_top(a^.edgesList, newE);
   result := newE;
+  if reversible then
+    createEdge(b, a, weight, movingType)^.road := newE^.road;
+  if movingType = car then createEdge(a, b, weight, foot, newE^.road, true);
 end;
 
 function compareVertices(a, b: Pointer): boolean;

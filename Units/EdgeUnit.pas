@@ -13,6 +13,7 @@ type
   end;
   TRoadVertexPt = ^TRoadVertex;
   TRoadGraph = TListOfPointers;  // list of TRoadVertex
+  TRoadGraphPt = ^TRoadGraph;
 
 procedure createRoadVertex(var list: TListOfPointers; latitude, longitude: real);
 
