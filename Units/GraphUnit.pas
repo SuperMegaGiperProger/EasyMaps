@@ -9,16 +9,6 @@ uses
 
 type
   TVertex = record
-<<<<<<< HEAD
-    latitude, longitude: real;  // широта, долгота
-    edgesList: TListOfPointers;  // ребра из данной вершины
-  end;
-  TVertexPt = ^TVertex;
-  TEdge = record
-    movingType: (car, plane, foot);
-    weight: real;  // вес ребра
-    endPoint: TVertexPt;  // вершина, в которую ведет это ребро
-=======
     latitude, longitude: real;
     edgesList: TListOfPointers;  // list of TEdge
     distation: real;  // distation to some vertex
@@ -30,7 +20,6 @@ type
     weight: real;  // in meters
     movingType: TMovingType;
     endPoint: TVertexPt;
->>>>>>> graph
   end;
   TEdgePt = ^TEdge;
   TGraphList = TListOfPointers;  // list of TVertex
