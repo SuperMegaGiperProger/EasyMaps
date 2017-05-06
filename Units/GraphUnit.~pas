@@ -28,14 +28,22 @@ var
   mapGraph: TGraphList = nil;
 
 function createVertex(latitude, longitude: real): TVertexPt;
-function createEdge(var list: TListOfPointers; weight: real; movingTYpe: TMovingType; endPoint: TVertexPt): TEdgePt;
+function createEdge(var list: TListOfPointers; weight: real;
+  movingTYpe: TMovingType; endPoint: TVertexPt): TEdgePt;
+function psevdoDistation(a, b: TVertex): real;
 
 //----------------------------------------------------------------------------//
 
 implementation
 
+function psevdoDistation(a, b: TVertex): real;
+begin
+  result := sqrt((a.latitude - b.latitude) * (a.latitude - b.latitude) +
+    (a.longitude - b.longitude) * (a.longitude - b.longitude));
+end;
 
-function createEdge(var list: TListOfPointers; weight: real; movingTYpe: TMovingType; endPoint: TVertexPt): TEdgePt;
+function createEdge(var list: TListOfPointers; weight: real;
+  movingTYpe: TMovingType; endPoint: TVertexPt): TEdgePt;
 var
   newE: TEdgePt;
 begin

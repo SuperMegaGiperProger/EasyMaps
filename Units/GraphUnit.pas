@@ -17,7 +17,7 @@ type
   TMovingType = (plane, car, foot);
   TEdge = record
     road: TRoadGraph;
-    weight: real;
+    weight: real;  // in meters
     movingType: TMovingType;
     endPoint: TVertexPt;
   end;
