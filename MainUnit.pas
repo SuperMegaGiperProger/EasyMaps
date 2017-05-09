@@ -21,16 +21,56 @@ begin
   a[4] := createVertex(53.916209, 27.584859); //M
   a[5] := createVertex(53.914977, 27.589140); //copir
 
+  a[6] := createVertex(53.920940, 27.596396); //akadem
+  a[7] := createVertex(53.919116, 27.598649); //hosp
+  a[8] := createVertex(53.918635, 27.597469);
+  a[9] := createVertex(53.918483, 27.597104);
+  a[10] := createVertex(53.917887, 27.597812);
+  a[11] := createVertex(53.916884, 27.596550); //3k
+
+  a[12] := createVertex(53.914771, 27.603885); //plat
+
+  e[8] := createEdge(a[2], a[6], 252, car, nil, true);
+  createRoadVertex(e[8]^.road^, 53.920940, 27.596396);
+
+  e[9] := createEdge(a[6], a[7], 249, car, nil, true);
+  e[10] := createEdge(a[7], a[12], 600, car, nil, true);
+  e[11] := createEdge(a[1], a[12], 252, car, nil, true);
+
+  createRoadVertex(e[9]^.road^, 53.919116, 27.598649);
+  createRoadVertex(e[10]^.road^, 53.914771, 27.603885);
+  createRoadVertex(e[11]^.road^, 53.914771, 27.603885);
+
+  e[12] := createEdge(a[7], a[8], 92, foot, nil, true);
+  e[13] := createEdge(a[8], a[9], 28, foot, nil, true);
+  e[14] := createEdge(a[8], a[10], 100, foot, nil, true);
+  e[15] := createEdge(a[9], a[10], 77, foot, nil, true);
+  e[16] := createEdge(a[10], a[11], 177, foot, nil, true);
+
+  createRoadVertex(e[12]^.road^, 53.918635, 27.597469);
+  createRoadVertex(e[13]^.road^, 53.918483, 27.597104);
+  createRoadVertex(e[14]^.road^, 53.918176, 27.597984);
+  createRoadVertex(e[14]^.road^, 53.918018, 27.598048);
+  createRoadVertex(e[14]^.road^, 53.917887, 27.597812);
+  createRoadVertex(e[15]^.road^, 53.917887, 27.597812);
+  createRoadVertex(e[16]^.road^, 53.917581, 27.598155);
+  createRoadVertex(e[16]^.road^, 53.916884, 27.596550);
+  {createRoadVertex
+  createRoadVertex
+  createRoadVertex
+  createRoadVertex
+  }
   e[1] := createEdge(a[0], a[1], 443, car, nil, true);
   //createEdge(a[0], a[1], 443, foot, e[1]^.road, true);
   createRoadVertex(e[1]^.road^, 53.910859, 27.595669);
   createRoadVertex(e[1]^.road^, 53.911624, 27.596930);
   createRoadVertex(e[1]^.road^, 53.913288, 27.600737);
 
-  e[2] := createEdge(a[2], a[1], 863, car);
-  //createEdge(a[2], a[1], 863, foot, e[2]^.road, true);
+  e[2] := createEdge(a[2], a[11], 380, car);
+  createRoadVertex(e[2]^.road^, 53.916884, 27.596550);
+
+  e[2] := createEdge(a[11], a[1], 480, car);
   createRoadVertex(e[2]^.road^, 53.913288, 27.600737);
-  createRoadVertex(e[2]^.road^, 53.919622, 27.593140);
 
   e[3] := createEdge(a[2], a[3], 560, car, nil, true);
   //createEdge(a[2], a[3], 560, foot, e[3]^.road, true);
@@ -60,6 +100,7 @@ begin
   createRoadVertex(e[7]^.road^, 53.915323, 27.587917);
   createRoadVertex(e[7]^.road^, 53.914753, 27.588861);
   createRoadVertex(e[7]^.road^, 53.914977, 27.589140);
+
 
   scale := 0.00005;
   //drawGraph(1 / 10000, 53.910, 27.58);

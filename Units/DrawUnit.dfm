@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 613
-  Top = 361
-  Width = 641
+  Left = 186
+  Top = 317
+  Width = 751
   Height = 675
   Caption = 'EasyMaps'
   Color = clBtnFace
@@ -16,7 +16,7 @@ object Form1: TForm1
   object mapImage: TImage
     Left = 160
     Top = 104
-    Width = 433
+    Width = 545
     Height = 489
     OnMouseUp = mapImageMouseUp
   end
@@ -45,5 +45,14 @@ object Form1: TForm1
     Caption = 'BitBtn2'
     TabOrder = 1
     OnClick = BitBtn2Click
+  end
+  object BitBtn3: TBitBtn
+    Left = 456
+    Top = 32
+    Width = 75
+    Height = 25
+    Caption = 'BitBtn3'
+    TabOrder = 2
+    OnClick = BitBtn3Click
   end
 end

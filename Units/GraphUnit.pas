@@ -16,8 +16,8 @@ type
     parent: TVertexPt;  // vertex from which we came
     used: boolean;  // flag
   end;
-  TMovingType = (plane, car, foot);  // you can go by foot beside a road
-  TMovingTypeSet = set of TMovingType;
+  TMovingType = (plane, car, foot);     // you can go by foot beside a road
+  TMovingTypeSet = set of TMovingType;  // in any direction
   TEdge = record
     road: TRoadGraphPt;
     weight: real;  // in meters

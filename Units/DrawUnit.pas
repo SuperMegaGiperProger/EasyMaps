@@ -12,10 +12,12 @@ type
     BitBtn1: TBitBtn;
     Shape1: TShape;
     BitBtn2: TBitBtn;
+    BitBtn3: TBitBtn;
     procedure BitBtn1Click(Sender: TObject);
     procedure mapImageMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
     procedure BitBtn2Click(Sender: TObject);
+    procedure BitBtn3Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -29,7 +31,7 @@ const
 var
   Form1: TForm1;
   scale: real = 0.0001;
-  latitude0: real = 53.920;
+  latitude0: real = 53.93;
   longitude0: real =  27.58;
 
 procedure drawGraph;
@@ -197,6 +199,9 @@ begin
   end;
 end;
 
+var
+  movType: TMovingType = car;
+
 procedure TForm1.mapImageMouseUp(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 var
@@ -210,12 +215,19 @@ begin
   Form1.mapImage.Canvas.Pen.Color := clBlue;
   drawVertex(v^);
   if start = nil then start := v
-  else drawTheShortiestWay(start, v, [car]);
+  else drawTheShortiestWay(start, v, [movType]);
 end;
 
 procedure TForm1.BitBtn2Click(Sender: TObject);
 begin
   start := nil;
+  movType := car;
+end;
+
+procedure TForm1.BitBtn3Click(Sender: TObject);
+begin
+  start := nil;
+  movType := foot;
 end;
 
 end.

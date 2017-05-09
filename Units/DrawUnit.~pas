@@ -29,7 +29,7 @@ const
 var
   Form1: TForm1;
   scale: real = 0.0001;
-  latitude0: real = 53.920;
+  latitude0: real = 53.93;
   longitude0: real =  27.58;
 
 procedure drawGraph;
@@ -210,7 +210,7 @@ begin
   Form1.mapImage.Canvas.Pen.Color := clBlue;
   drawVertex(v^);
   if start = nil then start := v
-  else drawTheShortiestWay(start, v, [car, foot]);
+  else drawTheShortiestWay(start, v, [car]);
 end;
 
 procedure TForm1.BitBtn2Click(Sender: TObject);
