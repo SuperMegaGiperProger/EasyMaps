@@ -1,6 +1,6 @@
 object Form1: TForm1
-  Left = 186
-  Top = 317
+  Left = 1031
+  Top = 168
   Width = 751
   Height = 675
   Caption = 'EasyMaps'
@@ -54,5 +54,23 @@ object Form1: TForm1
     Caption = 'BitBtn3'
     TabOrder = 2
     OnClick = BitBtn3Click
+  end
+  object BitBtn4: TBitBtn
+    Left = 64
+    Top = 344
+    Width = 75
+    Height = 25
+    Caption = 'BitBtn4'
+    TabOrder = 3
+    OnClick = BitBtn4Click
+  end
+  object BitBtn5: TBitBtn
+    Left = 64
+    Top = 400
+    Width = 75
+    Height = 25
+    Caption = 'BitBtn5'
+    TabOrder = 4
+    OnClick = BitBtn5Click
   end
 end

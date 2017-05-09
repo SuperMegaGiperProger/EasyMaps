@@ -17,7 +17,7 @@ procedure push_top(var list: TListOfPointers; data: Pointer);
 procedure pop_top(var list: TListOfPointers);
 function isEmpty(var list: TListOfPointers): boolean;
 procedure clear(var list: TListOfPointers);
-//procedure push(var list: TListOfPointers; data: pointer; compare: TCompare);
+procedure push(var list: TListOfPointers; data: pointer; compare: TCompare);
 
 //----------------------------------------------------------------------------//
 

@@ -37,14 +37,124 @@ function createEdge(a, b: TVertexPt; weight: real;
   movingTYpe: TMovingType; road: TRoadGraphPt = nil;
   reversible: boolean = false): TEdgePt;
 function psevdoDistation(a, b: TVertex): real;  // "distation" in degrees
-function getTheShortiestWay(s, f: TVertexPt;
+function getTheShortestWay(s, f: TVertexPt; out distation: real;
   movingTypeSet: TMovingTypeSet = [car, foot, plane]): boolean;
   // return does way exist or not
-
+function getTheShortestWayThroughtSeveralPoints(point: array of TVertexPt;
+  out distation: real; out way: TListOfPointers;
+  movingTypeSet: TMovingTypeSet = [car, foot, plane]): boolean;
+  // return does way exist or not
 
 //----------------------------------------------------------------------------//
 
 implementation
+
+type
+  TGamiltonWay = record
+    i, mask, mask0: integer;
+  end;
+  TGamiltonWayPt = ^TgamiltonWay;
+
+function getGamiltonWayPt(i, mask0: integer; dmask: integer = 0): TGamiltonWayPt;
+begin
+  new(result);
+  result^.i := i;
+  result^.mask0 := mask0;
+  result^.mask := mask0 - dmask;
+end;
+
+procedure min(var a: real; b: real);  // a := min(a, b);
+begin
+  if a > b then a := b;
+end;
+
+function getTheShortestWayThroughtSeveralPoints(point: array of TVertexPt;
+  out distation: real; out way: TListOfPointers;
+  movingTypeSet: TMovingTypeSet = [car, foot, plane]): boolean;
+var
+  g: array of array of real;
+  used: array of array of boolean;
+  d: array of array of real;
+  stack: TListOfPointers;
+  itEnd: TEltPt;
+  it: TGamiltonWayPt;
+  n, i, i0, j, mask, mask00, start: integer;
+begin
+  ////preparation and creating graph
+  n := length(point);
+  SetLength(g, n);
+  SetLength(used, n);
+  SetLength(d, n);
+  for i := 0 to n - 1 do
+  begin
+    SetLength(g[i], n);
+    SetLength(used[i], 1 shl n);
+    SetLength(d[i], 1 shl n);
+    for j := 0 to n - 1 do getTheShortestWay(point[i], point[j], g[i][j],
+      movingTypeSet);
+    for mask := 0 to (1 shl n) - 1 do
+    begin
+      d[i][mask] := INF;
+      used[i][mask] := false;
+    end;
+    d[i][0] := 0;
+  end;
+  distation := INF;
+  start := 0;
+  ////getting the shortes way throught all points which starts in i0
+  for i0 := 0 to n - 1 do
+  begin
+    mask00 := (1 shl n) - 1 - (1 shl i);
+    if not used[i0][mask00] then
+    begin
+      clear(stack);
+      push_top(stack, getGamiltonWayPt(i0, mask00));
+      while not isEmpty(stack) do
+      begin
+        it := stack^.data;
+        if used[it^.i][it^.mask0] then
+        begin
+          pop_top(stack);
+          continue;
+        end;
+        for j := 0 to n - 1 do
+          if (it^.mask and (1 shl j)) <> 0 then
+            if used[j][it^.mask0 - (1 shl j)] then
+            begin
+              min(d[it^.i][it^.mask0], d[j][it^.mask0 - (1 shl j)] + g[it^.i][j]);
+              dec(it^.mask, 1 shl j);
+            end
+            else
+              push_top(stack, getGamiltonWayPt(j, it^.mask0 - (1 shl j)));
+        if it^.mask = 0 then used[it^.i][it^.mask0] := true;
+      end;
+    end;
+    if distation > d[i0][mask00] then
+    begin
+      distation := d[i0][mask00];
+      start := i0;
+    end;
+  end;
+  result := (distation < INF);
+  if not result then exit;
+  /////getting way
+  new(way);
+  way := nil;
+  i := start;
+  mask := (1 shl n) - 1 - (1 shl start);
+  push_top(way, point[i]);
+  itEnd := way;
+  while mask <> 0 do
+    for j := 0 to n - 1 do
+      if ((mask and (1 shl j)) <> 0) and
+        (d[i][mask] = d[j][mask - (1 shl j)] + g[i][j]) then
+      begin
+        i := j;
+        dec(mask, 1 shl j);
+        push_back(itEnd^.next, point[i]);
+        break;
+      end;
+end;
 
 procedure minDistationVertex(var a: TVertexPt; b: TVertexPt); // a := min(a, b);
 begin
@@ -77,7 +187,7 @@ begin
   end;
 end;
 
-function getTheShortiestWay(s, f: TVertexPt;
+function getTheShortestWay(s, f: TVertexPt; out distation: real;
   movingTypeSet: TMovingTypeSet = [car, foot, plane]): boolean;
 var
   it, edgeIt: TEltPt;
@@ -101,6 +211,7 @@ begin
     if minV^.used or (minV^.distation >= INF) then exit;
     if minV = f then
     begin
+      distation := f^.distation;
       result := true;
       exit;
     end;
@@ -114,6 +225,7 @@ begin
       edgeIt := edgeIt^.next;
     end;
   end;
+  distation := f^.distation;
 end;
 
 function psevdoDistation(a, b: TVertex): real;

@@ -68,8 +68,8 @@ int main() {
         g[i] = new int[n];
         for (int j = 0; j < n; ++j)
             scanf("%d", &g[i][j]);
-        used[i] = new bool[(1 << n) - 1];
-        d[i] = new int[(1 << n) - 1];
+        used[i] = new bool[1 << n];
+        d[i] = new int[1 << n];
         for (int mask = 0; mask < (1 << n); ++mask) d[i][mask] = INF, used[i][mask] = false;
         d[i][0] = 0;
     }

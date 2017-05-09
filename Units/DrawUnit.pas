@@ -13,11 +13,15 @@ type
     Shape1: TShape;
     BitBtn2: TBitBtn;
     BitBtn3: TBitBtn;
+    BitBtn4: TBitBtn;
+    BitBtn5: TBitBtn;
     procedure BitBtn1Click(Sender: TObject);
     procedure mapImageMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
     procedure BitBtn2Click(Sender: TObject);
     procedure BitBtn3Click(Sender: TObject);
+    procedure BitBtn4Click(Sender: TObject);
+    procedure BitBtn5Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -171,12 +175,13 @@ end;
 var
   start: TVertexPt;
 
-procedure drawTheShortiestWay(s, f: TVertexPt; movingTypeSet: TMovingTypeSet);
+procedure drawTheShortestWay(s, f: TVertexPt; movingTypeSet: TMovingTypeSet);
 var
   it: TVertexPt;
   it2: TEltPt;
+  dist: real;
 begin
-  if not getTheShortiestWay(s, f, movingTypeSet) then
+  if not getTheShortestWay(s, f, dist, movingTypeSet) then
   begin
     showMessage('ѕуть не найден..');
     exit;
@@ -215,7 +220,7 @@ begin
   Form1.mapImage.Canvas.Pen.Color := clBlue;
   drawVertex(v^);
   if start = nil then start := v
-  else drawTheShortiestWay(start, v, [movType]);
+  else drawTheShortestWay(start, v, [movType]);
 end;
 
 procedure TForm1.BitBtn2Click(Sender: TObject);
@@ -228,6 +233,31 @@ procedure TForm1.BitBtn3Click(Sender: TObject);
 begin
   start := nil;
   movType := foot;
+end;
+
+var
+  arr: array of TVertexPt;
+
+procedure TForm1.BitBtn4Click(Sender: TObject);
+begin
+  SetLength(arr, 0);
+end;
+
+{procedure drawWay(way: TLitsOfPointers);
+var
+
+begin
+
+end;}
+
+procedure TForm1.BitBtn5Click(Sender: TObject);
+var
+  dist: real;
+  way: TListOfPointers;
+begin
+  {if not getTheShortestWayThroughtSeveralPoints(arr, dist, way, [foot]) then
+    showMessage('ѕуть не найден..')
+  else drawWay(  }
 end;
 
 end.
