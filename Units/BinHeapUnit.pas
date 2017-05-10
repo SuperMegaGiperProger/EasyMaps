@@ -14,11 +14,11 @@ type
   TBinHeapPt = ^TBinHeap;
 
 function createBinHeap(compare: TCompare; dMemory: integer = 20): TBinHeap;
-procedure push(var heap: TBinHeap; data: Pointer);
-function pop_top(var heap: TBinHeap): Pointer;
-function top(heap: TBinHeap): Pointer;
-function isEmpty(heap: TBinHeap): boolean;
-procedure clear(var heap: TBinHeap);
+procedure push(var heap: TBinHeap; data: Pointer; disposeMem: boolean = false); overload;
+function pop_top(var heap: TBinHeap): Pointer; overload;
+function top(heap: TBinHeap): Pointer; overload;
+function isEmpty(heap: TBinHeap): boolean; overload;
+procedure clear(var heap: TBinHeap); overload;
 procedure siftUp(var heap: TBinHeap; i: integer);
 procedure siftDown(var heap: TBinHeap; i: integer = 0);
 
@@ -78,7 +78,7 @@ begin
   end;
 end;
 
-procedure push(var heap: TBinHeap; data: Pointer);
+procedure push(var heap: TBinHeap; data: Pointer; disposeMem: boolean = false);
 begin
   with heap do
   begin
@@ -88,9 +88,10 @@ begin
       inc(memSize, dMemory);
       SetLength(arr, memSize);
     end;
+    if disposeMem and (arr[size - 1] <> nil) then Dispose(arr[size - 1]);
     arr[size - 1] := data;
   end;
-  siftUp(heap, size - 1);
+  siftUp(heap, heap.size - 1);
 end;
 
 function pop_top(var heap: TBinHeap): Pointer;
@@ -99,7 +100,7 @@ begin
   with heap do
   begin
     result := arr[0];
-    arr[0] := arr[size - 1];
+    swap(arr[0], arr[size - 1]);
     dec(size);
     siftDown(heap);
   end;
@@ -116,9 +117,13 @@ begin
 end;
 
 procedure clear(var heap: TBinHeap);
+var
+  i: integer;
 begin
   with heap do
   begin
+    for i := 0 to size - 1 do
+      if arr[i] <> nil then Dispose(arr[i]);
     SetLength(arr, 0);
     size := 0;
     memSize := 0;

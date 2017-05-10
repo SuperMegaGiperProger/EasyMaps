@@ -14,10 +14,10 @@ type
   TCompare = function (a, b: Pointer): boolean;
 
 procedure push_top(var list: TListOfPointers; data: Pointer);
-procedure pop_top(var list: TListOfPointers);
-function isEmpty(var list: TListOfPointers): boolean;
-procedure clear(var list: TListOfPointers);
-procedure push(var list: TListOfPointers; data: pointer; compare: TCompare);
+procedure pop_top(var list: TListOfPointers); overload;
+function isEmpty(var list: TListOfPointers): boolean; overload;
+procedure clear(var list: TListOfPointers); overload;
+procedure push(var list: TListOfPointers; data: pointer; compare: TCompare); overload;
 procedure push_back(var list: TListOfPointers; data: pointer);
 
 //----------------------------------------------------------------------------//

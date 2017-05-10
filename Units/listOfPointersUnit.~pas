@@ -18,10 +18,26 @@ procedure pop_top(var list: TListOfPointers);
 function isEmpty(var list: TListOfPointers): boolean;
 procedure clear(var list: TListOfPointers);
 procedure push(var list: TListOfPointers; data: pointer; compare: TCompare);
+procedure push_back(var list: TListOfPointers; data: pointer);
 
 //----------------------------------------------------------------------------//
 
 implementation
+
+procedure push_back(var list: TListOfPointers; data: pointer);
+var
+  it: TEltPt;
+begin
+  if list = nil then
+  begin
+    push_top(list, data);
+    exit;
+  end;
+  it := list;
+  while it^.next <> nil do
+    it := it^.next;
+  push_top(it^.next, data);
+end;
 
 procedure push(var list: TListOfPointers; data: pointer; compare: TCompare);
 var

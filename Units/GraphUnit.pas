@@ -5,7 +5,7 @@ unit GraphUnit;
 interface
 
 uses
-  listOfPointersUnit, EdgeUnit, Dialogs;
+  listOfPointersUnit, EdgeUnit, Dialogs, BinHeapUnit;
 
 type
   TVertexPt = ^TVertex;
@@ -57,6 +57,7 @@ function getTheShortestWayThroughtSeveralPointsWithStartAndFinish(
   point: array of TVertexPt; out distation: real; out way: TListOfPointers;
   movingTypeSet: TMovingTypeSet = [car, foot, plane]): boolean;
   // start := first point; finish := last point
+function compVerticesByDist(a, b: Pointer): boolean;
 
 //----------------------------------------------------------------------------//
 
@@ -442,20 +443,6 @@ begin
       end;
 end;
 
-procedure minDistationVertex(var a: TVertexPt; b: TVertexPt); // a := min(a, b);
-begin
-  if not b^.used and (a^.distation > b^.distation) then a := b;
-end;
-
-procedure relax(a, b: TVertexPt; weight: real);
-begin
-  if a^.distation > b^.distation + weight then
-  begin
-    a^.distation := b^.distation + weight;
-    a^.parent := b;
-  end;
-end;
-
 procedure preparation;
 var
   it: TEltPt;
@@ -473,6 +460,28 @@ begin
   end;
 end;
 
+type
+  TWayVertex = record
+    distation: real;
+    vertPt: TVertexPt;
+  end;
+  TWayVertexPt = ^TWayVertex;
+
+function compVerticesByDist(a, b: Pointer): boolean;
+begin
+  result := (TWayVertexPt(a)^.distation < TWayVertexPt(b)^.distation);
+end;
+
+function create(v: TVertexPt; d: real): TWayVertexPt;
+begin
+  new(result);
+  with result^ do
+  begin
+    vertPt := v;
+    distation := d;
+  end;
+end;
+
 function getTheShortestWay(s, f: TVertexPt; out distation: real;
   out way: TListOfPointers; movingTypeSet: TMovingTypeSet = [car, foot, plane]):
   boolean;
@@ -480,25 +489,20 @@ var
   it, itV2, edgeIt: TEltPt;
   itV: TVertexPt;
   minV: TVertexPt;  // vertex with min distation
-  infV: TVertex;
+  heap: TBinHeap;
 begin
   preparation;
   result := false;
   way := nil;
   s^.distation := 0;
-  infV.distation := INF;
-  infV.used := true;
+  heap := createBinHeap(compVerticesByDist, 1000);
+  push(heap, create(s, 0));
   //// searching the shortest way
-  while not f^.used do
+  while not isEmpty(heap) do
   begin
-    it := mapGraph;
-    minV := @infV;
-    while it <> nil do
-    begin
-      minDistationVertex(minV, it^.data);
-      it := it^.next;
-    end;
-    if minV^.used or (minV^.distation >= INF) then exit;
+    minV := TWayVertexPt(pop_top(heap))^.vertPt;
+    if minV^.distation >= INF then exit;
+    if minV^.used then continue;
     if minV = f then
     begin
       result := true;
@@ -509,11 +513,17 @@ begin
     while edgeIt <> nil do
     begin
       with TEdgePt(edgeIt^.data)^ do
-        if (movingType in movingTypeSet) and not endPoint^.used then
-          relax(endPoint, minV, weight);
+        if (movingType in movingTypeSet)
+          and (endPoint^.distation > minV^.distation + weight) then
+        begin
+          endPoint^.distation := minV^.distation + weight;
+          endPoint^.parent := minV;
+          push(heap, create(endPoint, endPoint^.distation), true);
+        end;
       edgeIt := edgeIt^.next;
     end;
   end;
+  clear(heap);
   distation := f^.distation;
   if not result then exit;
   //// restoring way

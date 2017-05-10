@@ -250,7 +250,7 @@ begin
   drawVertex(v^);
   SetLength(arr, length(arr) + 1);
   arr[length(arr) - 1] := v;
-  //if start = nil then start := v
+  //start = nil then start := v
   //else drawTheShortestWay(start, v, [movType]);
 end;
 

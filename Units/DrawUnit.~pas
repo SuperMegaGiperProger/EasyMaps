@@ -250,8 +250,8 @@ begin
   drawVertex(v^);
   SetLength(arr, length(arr) + 1);
   arr[length(arr) - 1] := v;
-  //if start = nil then start := v
-  //else drawTheShortestWay(start, v, [movType]);
+  if start = nil then start := v
+  else drawTheShortestWay(start, v, [movType]);
 end;
 
 procedure TForm1.BitBtn2Click(Sender: TObject);
@@ -278,7 +278,7 @@ end;
 
 procedure TForm1.BitBtn6Click(Sender: TObject);
 begin
-  drawTheShortestWayTroughtSeveralPoints(arr, true, true);
+  drawTheShortestWayTroughtSeveralPoints(arr, false, true);
 end;
 
 end.
