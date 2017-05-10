@@ -82,4 +82,22 @@ object Form1: TForm1
     TabOrder = 5
     OnClick = BitBtn6Click
   end
+  object BitBtn7: TBitBtn
+    Left = 64
+    Top = 496
+    Width = 75
+    Height = 25
+    Caption = 'BitBtn7'
+    TabOrder = 6
+    OnClick = BitBtn7Click
+  end
+  object BitBtn8: TBitBtn
+    Left = 64
+    Top = 536
+    Width = 75
+    Height = 25
+    Caption = 'BitBtn8'
+    TabOrder = 7
+    OnClick = BitBtn8Click
+  end
 end

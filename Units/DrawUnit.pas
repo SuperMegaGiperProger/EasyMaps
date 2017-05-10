@@ -16,6 +16,8 @@ type
     BitBtn4: TBitBtn;
     BitBtn5: TBitBtn;
     BitBtn6: TBitBtn;
+    BitBtn7: TBitBtn;
+    BitBtn8: TBitBtn;
     procedure BitBtn1Click(Sender: TObject);
     procedure mapImageMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
@@ -24,6 +26,8 @@ type
     procedure BitBtn4Click(Sender: TObject);
     procedure BitBtn5Click(Sender: TObject);
     procedure BitBtn6Click(Sender: TObject);
+    procedure BitBtn7Click(Sender: TObject);
+    procedure BitBtn8Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -208,10 +212,7 @@ var
   way: TListOfPointers;
   exist: boolean;
 begin
-  if finish and start then exist := getTheShortestWayThroughtSeveralPointsWithStartAndFinish(point, dist, way, movingTypeSet)
-  else if finish then exist := getTheShortestWayThroughtSeveralPointsWithFinish(point, dist, way, movingTypeSet)
-  else if start then exist := getTheShortestWayThroughtSeveralPointsWithStart(point, dist, way, movingTypeSet)
-  else exist := getTheShortestWayThroughtSeveralPoints(point, dist, way, movingTypeSet);
+  exist := getTheShortestWayThroughtSeveralPoints(point, dist, way, start, finish, movingTypeSet);
   if not exist then
   begin
     showMessage('ѕуть не найден..');
@@ -278,7 +279,17 @@ end;
 
 procedure TForm1.BitBtn6Click(Sender: TObject);
 begin
+  drawTheShortestWayTroughtSeveralPoints(arr, true, false);
+end;
+
+procedure TForm1.BitBtn7Click(Sender: TObject);
+begin
   drawTheShortestWayTroughtSeveralPoints(arr, false, true);
+end;
+
+procedure TForm1.BitBtn8Click(Sender: TObject);
+begin
+  drawTheShortestWayTroughtSeveralPoints(arr, true, true);
 end;
 
 end.
