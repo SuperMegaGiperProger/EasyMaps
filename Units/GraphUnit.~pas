@@ -5,7 +5,7 @@ unit GraphUnit;
 interface
 
 uses
-  listOfPointersUnit, EdgeUnit;
+  listOfPointersUnit, EdgeUnit, Dialogs;
 
 type
   TVertexPt = ^TVertex;
@@ -38,7 +38,8 @@ function createEdge(a, b: TVertexPt; weight: real;
   reversible: boolean = false): TEdgePt;
 function psevdoDistation(a, b: TVertex): real;  // "distation" in degrees
 function getTheShortestWay(s, f: TVertexPt; out distation: real;
-  movingTypeSet: TMovingTypeSet = [car, foot, plane]): boolean;
+  out way: TListOfPointers; movingTypeSet: TMovingTypeSet = [car, foot, plane]):
+  boolean;
   // return does way exist or not
 function getTheShortestWayThroughtSeveralPoints(point: array of TVertexPt;
   out distation: real; out way: TListOfPointers;
@@ -75,22 +76,28 @@ var
   g: array of array of real;
   used: array of array of boolean;
   d: array of array of real;
+  wayPart: array of array of TListOfPointers;
   stack: TListOfPointers;
+  itEnd: TEltPt;
   it: TGamiltonWayPt;
   n, i, i0, j, mask, mask00, start: integer;
 begin
-  ////preparation and creating graph
+  ////preparation
   n := length(point);
   SetLength(g, n);
   SetLength(used, n);
   SetLength(d, n);
+  SetLEngth(wayPart, n);
+  stack := nil;
+  ////creating graph
   for i := 0 to n - 1 do
   begin
     SetLength(g[i], n);
     SetLength(used[i], 1 shl n);
     SetLength(d[i], 1 shl n);
+    SetLEngth(wayPart[i], n);
     for j := 0 to n - 1 do getTheShortestWay(point[i], point[j], g[i][j],
-      movingTypeSet);
+      wayPart[i][j], movingTypeSet);
     for mask := 0 to (1 shl n) - 1 do
     begin
       d[i][mask] := INF;
@@ -100,7 +107,7 @@ begin
   end;
   distation := INF;
   start := 0;
-  ////get the shortes way throught all points which starts in i0
+  ////getting the shortes way throught all points which starts in i0
   for i0 := 0 to n - 1 do
   begin
     mask00 := (1 shl n) - 1 - (1 shl i);
@@ -136,10 +143,22 @@ begin
   end;
   result := (distation < INF);
   if not result then exit;
-  /////get way
+  /////getting way
+  way := nil;
   i := start;
   mask := (1 shl n) - 1 - (1 shl start);
-
+  //push_top(way, point[i]);
+  //itEnd := way;
+  while mask <> 0 do
+    for j := 0 to n - 1 do
+      if ((mask and (1 shl j)) <> 0) and
+        (d[i][mask] = d[j][mask - (1 shl j)] + g[i][j]) then
+      begin
+        push_top(way, wayPart[i][j]);
+        i := j;
+        dec(mask, 1 shl j);
+        break;
+      end;
 end;
 
 procedure minDistationVertex(var a: TVertexPt; b: TVertexPt); // a := min(a, b);
@@ -173,18 +192,22 @@ begin
   end;
 end;
 
-function getTheShortesWay(s, f: TVertexPt; out distation: real;
-  movingTypeSet: TMovingTypeSet = [car, foot, plane]): boolean;
+function getTheShortestWay(s, f: TVertexPt; out distation: real;
+  out way: TListOfPointers; movingTypeSet: TMovingTypeSet = [car, foot, plane]):
+  boolean;
 var
-  it, edgeIt: TEltPt;
+  it, itV2, edgeIt: TEltPt;
+  itV: TVertexPt;
   minV: TVertexPt;  // vertex with min distation
   infV: TVertex;
 begin
   preparation;
   result := false;
+  way := nil;
   s^.distation := 0;
   infV.distation := INF;
   infV.used := true;
+  //// searching the shortest way
   while not f^.used do
   begin
     it := mapGraph;
@@ -197,9 +220,8 @@ begin
     if minV^.used or (minV^.distation >= INF) then exit;
     if minV = f then
     begin
-      distation := f^.distation;
       result := true;
-      exit;
+      break;
     end;
     minV^.used := true;
     edgeIt := minV^.edgesList;
@@ -212,6 +234,22 @@ begin
     end;
   end;
   distation := f^.distation;
+  if not result then exit;
+  //// restoring way
+  itV := f;
+  while itV^.parent <> nil do
+  begin
+    itV2 := itV^.parent^.edgesList;
+    while (itV2 <> nil) and (TEdgePt(itV2^.data)^.endPoint <> itV) do
+      itV2 := itV2^.next;
+    if (itV2 = nil) or (TEdgePt(itV2^.data)^.endPoint <> itV) then
+    begin
+      showMessage('Output error');
+      exit;
+    end;
+    push_top(way, itV2^.data);
+    itV := itV^.parent;
+  end;
 end;
 
 function psevdoDistation(a, b: TVertex): real;

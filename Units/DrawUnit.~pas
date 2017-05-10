@@ -129,6 +129,7 @@ var
   it: TEltPt;
   v: TVertex;
 begin
+  Form1.mapImage.Picture.Graphic := nil;
   Form1.mapImage.Canvas.Brush.Color := clRed;
   Form1.mapImage.Canvas.Pen.Color := clRed;
   it := mapGraph;
@@ -177,35 +178,54 @@ var
 
 procedure drawTheShortestWay(s, f: TVertexPt; movingTypeSet: TMovingTypeSet);
 var
-  it: TVertexPt;
-  it2: TEltPt;
+  it: TEltPt;
   dist: real;
+  way: TListOfPointers;
 begin
-  if not getTheShortestWay(s, f, dist, movingTypeSet) then
+  if not getTheShortestWay(s, f, dist, way, movingTypeSet) then
   begin
     showMessage('ѕуть не найден..');
     exit;
   end;
   Form1.mapImage.Canvas.Brush.Color := clGreen;
   Form1.mapImage.Canvas.Pen.Color := clGreen;
-  it := f;
-  while it^.parent <> nil do
+  it := way;
+  while it <> nil do
   begin
-    it2 := it^.parent^.edgesList;
-    while (it2 <> nil) and (TEdgePt(it2^.data)^.endPoint <> it) do
-      it2 := it2^.next;
-    if (it2 = nil) or (TEdgePt(it2^.data)^.endPoint <> it) then
+    drawRoad(TEdgePt(it^.data)^.road^, psDot, 2);
+    it := it^.next;
+  end;
+end;
+
+procedure drawTheShortestWayTroughtSeveralPoints(point: array of TVertexPt;
+  movingTypeSet: TMovingTypeSet = [car, foot, plane]);
+var
+  it, it2: TEltPt;
+  dist: real;
+  way: TListOfPointers;
+begin
+  if not getTheShortestWayThroughtSeveralPoints(point, dist, way, movingTypeSet) then
+  begin
+    showMessage('ѕуть не найден..');
+    exit;
+  end;
+  Form1.mapImage.Canvas.Brush.Color := clGreen;
+  Form1.mapImage.Canvas.Pen.Color := clGreen;
+  it2 := way;
+  while it2 <> nil do
+  begin
+    it := TEltPt(it2^.data);
+    while it <> nil do
     begin
-      showMessage('Output error');
-      exit;
+      drawRoad(TEdgePt(it^.data)^.road^, psDot, 2);
+      it := it^.next;
     end;
-    drawRoad(TEdgePt(it2^.data)^.road^, psDot, 2);
-    it := it^.parent;
   end;
 end;
 
 var
   movType: TMovingType = car;
+  arr: array of TVertexPt;
 
 procedure TForm1.mapImageMouseUp(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
@@ -219,8 +239,10 @@ begin
   Form1.mapImage.Canvas.Brush.Color := clBlue;
   Form1.mapImage.Canvas.Pen.Color := clBlue;
   drawVertex(v^);
-  if start = nil then start := v
-  else drawTheShortestWay(start, v, [movType]);
+  SetLength(arr, length(arr) + 1);
+  arr[length(arr) - 1] := v;
+  //if start = nil then start := v
+  //else drawTheShortestWay(start, v, [movType]);
 end;
 
 procedure TForm1.BitBtn2Click(Sender: TObject);
@@ -235,29 +257,14 @@ begin
   movType := foot;
 end;
 
-var
-  arr: array of TVertexPt;
-
 procedure TForm1.BitBtn4Click(Sender: TObject);
 begin
   SetLength(arr, 0);
 end;
 
-procedure drawWay(way: TLitsOfPointers);
-var
-
-begin
-
-end;
-
 procedure TForm1.BitBtn5Click(Sender: TObject);
-var
-  dist: real;
-  way: TListOfPointers;
 begin
-  {if not getTheShortestWayThroughtSeveralPoints(arr, dist, way, [foot]) then
-    showMessage('ѕуть не найден..')
-  else drawWay(  }
+  drawTheShortestWayTroughtSeveralPoints(arr);
 end;
 
 end.
