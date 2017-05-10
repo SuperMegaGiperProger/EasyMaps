@@ -7,9 +7,11 @@ interface
 type
   TCompare = function (a, b: Pointer): boolean;
   TBinHeap = record
-    arr: array of Pointer;
-    size, memSize, dMemory: integer;
-    compare: TCompare;
+    arr: array of Pointer;  // array of elements, arr[0] - root of tree
+    size: integer;  // num of elements,
+    memSize: integer;  // allocated memory(in num of elements)
+    dMemory: integer;  // memory increment
+    compare: TCompare;  // function to compare
   end;
   TBinHeapPt = ^TBinHeap;
 
@@ -18,9 +20,11 @@ procedure push(var heap: TBinHeap; data: Pointer; disposeMem: boolean = false); 
 function pop_top(var heap: TBinHeap): Pointer; overload;
 function top(heap: TBinHeap): Pointer; overload;
 function isEmpty(heap: TBinHeap): boolean; overload;
-procedure clear(var heap: TBinHeap); overload;
-procedure siftUp(var heap: TBinHeap; i: integer);
-procedure siftDown(var heap: TBinHeap; i: integer = 0);
+procedure clear(var heap: TBinHeap; disposeMem: boolean = false); overload;
+procedure siftUp(var heap: TBinHeap; i: integer);  // element [i] goes up, while
+                                                   // heap unordered
+procedure siftDown(var heap: TBinHeap; i: integer = 0);  // elem. [i] goes down,
+                                                         // while heap unordered
 
 //----------------------------------------------------------------------------//
 
@@ -100,7 +104,7 @@ begin
   with heap do
   begin
     result := arr[0];
-    arr[0] := arr[size - 1];
+    swap(arr[0], arr[size - 1]);
     dec(size);
     siftDown(heap);
   end;
@@ -116,14 +120,15 @@ begin
   result := (heap.size <= 0);
 end;
 
-procedure clear(var heap: TBinHeap);
+procedure clear(var heap: TBinHeap; disposeMem: boolean = false);
 var
   i: integer;
 begin
   with heap do
   begin
-    for i := 0 to size - 1 do
-      if arr[i] <> nil then Dispose(arr[i]);
+    if disposeMem then
+      for i := 0 to size - 1 do
+        if arr[i] <> nil then Dispose(arr[i]);
     SetLength(arr, 0);
     size := 0;
     memSize := 0;

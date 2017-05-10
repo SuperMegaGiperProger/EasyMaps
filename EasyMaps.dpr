@@ -5,7 +5,7 @@ uses
   DrawUnit in 'Units\DrawUnit.pas' {Form1},
   GraphUnit in 'Units\GraphUnit.pas',
   listOfPointersUnit in 'Units\listOfPointersUnit.pas',
-  EdgeUnit in 'Units\EdgeUnit.pas',
+  RoadUnit in 'Units\RoadUnit.pas',
   MainUnit in 'MainUnit.pas',
   BinHeapUnit in 'Units\BinHeapUnit.pas';
 

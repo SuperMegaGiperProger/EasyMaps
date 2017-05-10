@@ -6,19 +6,20 @@ interface
 
 type
   TEltPt = ^TElt;
-  TElt = record //элемент списка
+  TElt = record  // list element
     data: Pointer;
     next: TEltPt;
   end;
   TListOfPointers = TEltPt;
   TCompare = function (a, b: Pointer): boolean;
 
-procedure push_top(var list: TListOfPointers; data: Pointer);
-procedure pop_top(var list: TListOfPointers); overload;
-function isEmpty(var list: TListOfPointers): boolean; overload;
-procedure clear(var list: TListOfPointers); overload;
-procedure push(var list: TListOfPointers; data: pointer; compare: TCompare); overload;
-procedure push_back(var list: TListOfPointers; data: pointer);
+procedure push_top(var list: TListOfPointers; data: Pointer);  // O(1)
+procedure pop_top(var list: TListOfPointers); overload;  // O(1)
+function isEmpty(var list: TListOfPointers): boolean; overload;  // O(1)
+procedure clear(var list: TListOfPointers); overload;  // O(N)
+procedure push(var list: TListOfPointers; data: pointer;
+  compare: TCompare); overload;  // was NOT tested !!!  // O(N)
+procedure push_back(var list: TListOfPointers; data: pointer);  // O(N)
 
 //----------------------------------------------------------------------------//
 

@@ -6,7 +6,8 @@ uses
   GraphUnit in 'Units\GraphUnit.pas',
   listOfPointersUnit in 'Units\listOfPointersUnit.pas',
   EdgeUnit in 'Units\EdgeUnit.pas',
-  MainUnit in 'MainUnit.pas';
+  MainUnit in 'MainUnit.pas',
+  BinHeapUnit in 'Units\BinHeapUnit.pas';
 
 {$R *.res}
 

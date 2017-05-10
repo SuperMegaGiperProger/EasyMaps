@@ -1,4 +1,4 @@
-unit EdgeUnit;
+unit RoadUnit;  // this unit works with roads
  
 //----------------------------------------------------------------------------//
 

@@ -5,7 +5,7 @@ unit GraphUnit;
 interface
 
 uses
-  listOfPointersUnit, EdgeUnit, Dialogs, BinHeapUnit;
+  listOfPointersUnit, RoadUnit, Dialogs, BinHeapUnit;
 
 type
   TVertexPt = ^TVertex;
@@ -16,7 +16,7 @@ type
     parent: TVertexPt;  // vertex from which we came
     used: boolean;  // flag
   end;
-  TMovingType = (plane, car, foot);     // you can go by foot beside a road
+  TMovingType = (plane, car, foot);     // you can go by foot beside a car road
   TMovingTypeSet = set of TMovingType;  // in any direction
   TEdge = record
     road: TRoadGraphPt;
@@ -30,22 +30,27 @@ type
 const
   INF = 1000000000;  // infinity way
 var
-  mapGraph: TGraphList = nil;
+  mapGraph: TGraphList = nil;  // main map graph
 
-function createVertex(latitude, longitude: real): TVertexPt;
+function createVertex(latitude, longitude: real): TVertexPt;  // put vertex
+                                                              // in mapGraph
+                                                              // O(1)
 function createEdge(a, b: TVertexPt; weight: real;
   movingTYpe: TMovingType; road: TRoadGraphPt = nil;
-  reversible: boolean = false): TEdgePt;
+  reversible: boolean = false): TEdgePt;  // O(1)
 function psevdoDistation(a, b: TVertex): real;  // "distation" in degrees
 function getTheShortestWay(s, f: TVertexPt; out distation: real;
   out way: TListOfPointers; movingTypeSet: TMovingTypeSet = [car, foot, plane]):
   boolean;
-  // return does way exist or not
-function getTheShortestWayThroughtSeveralPoints(point: array of TVertexPt;
+  // func return does way exist or not
+  // O(m log n)  // because graph is rarefied
+function getTheShortestWayThroughSeveralPoints(point: array of TVertexPt;
   out distation: real; out way: TListOfPointers; startB: boolean = false;
   finishB: boolean = false; movingTypeSet: TMovingTypeSet = [car, foot, plane]):
-  boolean;
-  // return does way exist or not
+  boolean;  // startB = is point[0] must be first on way
+  // finishB = is point[size - 1] must be last on way
+  // func return does way exist or not
+  // O(n^2 * 2^n + n^2 * O(getTheShortestWay))  // memory O(n * 2^n)
 
 //----------------------------------------------------------------------------//
 
@@ -53,9 +58,11 @@ implementation
 
 type
   TGamiltonWay = record
-    i, mask, mask0: integer;
+    i: integer;  // start position
+    mask: integer;  // mask of unchecked vertices
+    mask0: integer;  // way consist of this vertices
   end;
-  TGamiltonWayPt = ^TgamiltonWay;
+  TGamiltonWayPt = ^TGamiltonWay;
 
 function getGamiltonWayPt(i, mask0: integer; dmask: integer = 0): TGamiltonWayPt;
 begin
@@ -70,20 +77,21 @@ begin
   if a > b then a := b;
 end;
 
-function getTheShortestWayThroughtSeveralPoints(point: array of TVertexPt;
+function getTheShortestWayThroughSeveralPoints(point: array of TVertexPt;
   out distation: real; out way: TListOfPointers; startB: boolean = false;
   finishB: boolean = false; movingTypeSet: TMovingTypeSet = [car, foot, plane]):
   boolean;
+  // looks through all gamilton ways and chooses the shortest
 var
-  g: array of array of real;
-  used: array of array of boolean;
-  d: array of array of real;
-  wayPart: array of array of TListOfPointers;
+  g: array of array of real;  // adjacency matrix
+  used: array of array of boolean;  // is gamilton way was used
+  d: array of array of real;  // gamilton way length
+  wayPart: array of array of TListOfPointers;  // way from point[i] to point[j]
   stack: TListOfPointers;
-  itEnd: TEltPt;
   it: TGamiltonWayPt;
-  n, i, i0, j, mask, mask00, start: integer;
-  lastStart, finish, fn: integer;
+  n, i, i0, j, mask, mask00, start, finish: integer;  // n = point number
+  lastStart: integer;  // last start point which func looks through
+  fn: integer;  // "false" n  // fn = point number, which func looks throught
 begin
   ////preparation
   n := length(point);
@@ -101,8 +109,7 @@ begin
   begin
     fn := n - 1;
     if finish - 1 < lastStart then lastStart := finish - 1;
-  end
-  else fn := n;
+  end else fn := n;
   ////creating graph
   for i := 0 to n - 1 do
   begin
@@ -120,7 +127,7 @@ begin
     if finishB then d[i][0] := g[i][finish]
     else d[i][0] := 0;
   end;
-  ////getting the shortes way throught all points which starts in i0
+  ////getting the shortes way throught fn points which starts in i0
   for i0 := 0 to lastStart do
   begin
     mask00 := (1 shl fn) - 1 - (1 shl i0);
@@ -141,7 +148,7 @@ begin
             if used[j][it^.mask0 - (1 shl j)] then
             begin
               min(d[it^.i][it^.mask0], d[j][it^.mask0 - (1 shl j)] + g[it^.i][j]);
-              dec(it^.mask, 1 shl j);
+              dec(it^.mask, 1 shl j);  // because func considered j point
             end
             else
               push_top(stack, getGamiltonWayPt(j, it^.mask0 - (1 shl j)));
@@ -154,14 +161,13 @@ begin
       start := i0;
     end;
   end;
+  clear(stack);
   result := (distation < INF);
   if not result then exit;
   /////getting way
   way := nil;
   i := start;
   mask := (1 shl fn) - 1 - (1 shl start);
-  //push_top(way, point[i]);
-  //itEnd := way;
   while mask <> 0 do
     for j := 0 to fn - 1 do
       if ((mask and (1 shl j)) <> 0) and
@@ -218,7 +224,7 @@ function getTheShortestWay(s, f: TVertexPt; out distation: real;
   out way: TListOfPointers; movingTypeSet: TMovingTypeSet = [car, foot, plane]):
   boolean;
 var
-  it, itV2, edgeIt: TEltPt;
+  itV2, edgeIt: TEltPt;
   itV: TVertexPt;
   minV: TVertexPt;  // vertex with min distation
   heap: TBinHeap;
@@ -255,7 +261,7 @@ begin
       edgeIt := edgeIt^.next;
     end;
   end;
-  clear(heap);
+  clear(heap, true);
   distation := f^.distation;
   if not result then exit;
   //// restoring way

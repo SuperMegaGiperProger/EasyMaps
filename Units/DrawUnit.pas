@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, GraphUnit, ExtCtrls, listOfPointersUnit, StdCtrls, Buttons, EdgeUnit;
+  Dialogs, GraphUnit, ExtCtrls, listOfPointersUnit, StdCtrls, Buttons, RoadUnit;
 
 type
   TForm1 = class(TForm)
@@ -203,7 +203,7 @@ begin
   end;
 end;
 
-procedure drawTheShortestWayTroughtSeveralPoints(point: array of TVertexPt;
+procedure drawTheShortestWayTroughSeveralPoints(point: array of TVertexPt;
   start: boolean = false; finish: boolean = false;
   movingTypeSet: TMovingTypeSet = [car, foot, plane]);
 var
@@ -212,7 +212,7 @@ var
   way: TListOfPointers;
   exist: boolean;
 begin
-  exist := getTheShortestWayThroughtSeveralPoints(point, dist, way, start, finish, movingTypeSet);
+  exist := getTheShortestWayThroughSeveralPoints(point, dist, way, start, finish, movingTypeSet);
   if not exist then
   begin
     showMessage('ѕуть не найден..');
@@ -274,22 +274,22 @@ end;
 
 procedure TForm1.BitBtn5Click(Sender: TObject);
 begin
-  drawTheShortestWayTroughtSeveralPoints(arr);
+  drawTheShortestWayTroughSeveralPoints(arr, false, false, [movType]);
 end;
 
 procedure TForm1.BitBtn6Click(Sender: TObject);
 begin
-  drawTheShortestWayTroughtSeveralPoints(arr, true, false);
+  drawTheShortestWayTroughSeveralPoints(arr, true, false, [movType]);
 end;
 
 procedure TForm1.BitBtn7Click(Sender: TObject);
 begin
-  drawTheShortestWayTroughtSeveralPoints(arr, false, true);
+  drawTheShortestWayTroughSeveralPoints(arr, false, true, [movType]);
 end;
 
 procedure TForm1.BitBtn8Click(Sender: TObject);
 begin
-  drawTheShortestWayTroughtSeveralPoints(arr, true, true);
+  drawTheShortestWayTroughSeveralPoints(arr, true, true, [movType]);
 end;
 
 end.
