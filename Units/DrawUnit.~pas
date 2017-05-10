@@ -15,6 +15,7 @@ type
     BitBtn3: TBitBtn;
     BitBtn4: TBitBtn;
     BitBtn5: TBitBtn;
+    BitBtn6: TBitBtn;
     procedure BitBtn1Click(Sender: TObject);
     procedure mapImageMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
@@ -22,6 +23,7 @@ type
     procedure BitBtn3Click(Sender: TObject);
     procedure BitBtn4Click(Sender: TObject);
     procedure BitBtn5Click(Sender: TObject);
+    procedure BitBtn6Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -198,13 +200,19 @@ begin
 end;
 
 procedure drawTheShortestWayTroughtSeveralPoints(point: array of TVertexPt;
+  start: boolean = false; finish: boolean = false;
   movingTypeSet: TMovingTypeSet = [car, foot, plane]);
 var
   it, it2: TEltPt;
   dist: real;
   way: TListOfPointers;
+  exist: boolean;
 begin
-  if not getTheShortestWayThroughtSeveralPoints(point, dist, way, movingTypeSet) then
+  if finish and start then exist := getTheShortestWayThroughtSeveralPointsWithStartAndFinish(point, dist, way, movingTypeSet)
+  else if finish then exist := getTheShortestWayThroughtSeveralPointsWithFinish(point, dist, way, movingTypeSet)
+  else if start then exist := getTheShortestWayThroughtSeveralPointsWithStart(point, dist, way, movingTypeSet)
+  else exist := getTheShortestWayThroughtSeveralPoints(point, dist, way, movingTypeSet);
+  if not exist then
   begin
     showMessage('ѕуть не найден..');
     exit;
@@ -220,6 +228,7 @@ begin
       drawRoad(TEdgePt(it^.data)^.road^, psDot, 2);
       it := it^.next;
     end;
+    it2 := it2^.next;
   end;
 end;
 
@@ -265,6 +274,11 @@ end;
 procedure TForm1.BitBtn5Click(Sender: TObject);
 begin
   drawTheShortestWayTroughtSeveralPoints(arr);
+end;
+
+procedure TForm1.BitBtn6Click(Sender: TObject);
+begin
+  drawTheShortestWayTroughtSeveralPoints(arr, true, true);
 end;
 
 end.
