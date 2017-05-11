@@ -1,10 +1,13 @@
 unit DrawUnit;
+ 
+//----------------------------------------------------------------------------//
 
 interface                   
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, GraphUnit, ExtCtrls, listOfPointersUnit, StdCtrls, Buttons, RoadUnit;
+  Dialogs, GraphUnit, ExtCtrls, listOfPointersUnit, StdCtrls, Buttons, RoadUnit,
+  HashUnit;
 
 type
   TForm1 = class(TForm)
@@ -45,6 +48,8 @@ var
   longitude0: real =  27.58;
 
 procedure drawGraph;
+  
+//----------------------------------------------------------------------------//
 
 implementation
 
@@ -291,5 +296,7 @@ procedure TForm1.BitBtn8Click(Sender: TObject);
 begin
   drawTheShortestWayTroughSeveralPoints(arr, true, true, [movType]);
 end;
+  
+//----------------------------------------------------------------------------//
 
 end.

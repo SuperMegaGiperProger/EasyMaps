@@ -7,7 +7,8 @@ uses
   listOfPointersUnit in 'Units\listOfPointersUnit.pas',
   RoadUnit in 'Units\RoadUnit.pas',
   MainUnit in 'MainUnit.pas',
-  BinHeapUnit in 'Units\BinHeapUnit.pas';
+  BinHeapUnit in 'Units\BinHeapUnit.pas',
+  HashUnit in 'Units\HashUnit.pas';
 
 {$R *.res}
 
