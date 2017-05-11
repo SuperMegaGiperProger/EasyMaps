@@ -181,7 +181,7 @@ begin
   if finishB then push_top(way, wayPart[i][finish]);
 end;
 
-procedure preparation;
+procedure preparationForGettingTheShortestWay;
 var
   it: TEltPt;
 begin
@@ -229,13 +229,13 @@ var
   minV: TVertexPt;  // vertex with min distation
   heap: TBinHeap;
 begin
-  preparation;
+  preparationForGettingTheShortestWay;
   result := false;
   way := nil;
   s^.distation := 0;
   heap := createBinHeap(compVerticesByDist, 1000);
   push(heap, create(s, 0));
-  //// searching the shortest way
+  ////searching the shortest way
   while not isEmpty(heap) do
   begin
     minV := TWayVertexPt(pop_top(heap))^.vertPt;
@@ -250,7 +250,7 @@ begin
     edgeIt := minV^.edgesList;
     while edgeIt <> nil do
     begin
-      with TEdgePt(edgeIt^.data)^ do
+      with TEdgePt(edgeIt^.data)^ do  // relaxation
         if (movingType in movingTypeSet)
           and (endPoint^.distation > minV^.distation + weight) then
         begin
@@ -264,7 +264,7 @@ begin
   clear(heap, true);
   distation := f^.distation;
   if not result then exit;
-  //// restoring way
+  ////restoring way
   itV := f;
   while itV^.parent <> nil do
   begin

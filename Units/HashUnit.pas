@@ -30,7 +30,7 @@ const
 function createHashList(hashFunc: THashFunc{ = STANDART_HASH_FUNC};
   size: integer = STANDART_HASH_TABLE_SIZE): THashList;
 function get(hashList: THashList; key: Variant; correct: TCorrectFunc): TEltPt;
-procedure push(hashList: THashList; key: Variant; data: Pointer);
+procedure push(hashList: THashList; key: Variant; data: Pointer); overload;
 
 //----------------------------------------------------------------------------//
 

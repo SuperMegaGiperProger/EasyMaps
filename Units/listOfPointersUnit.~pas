@@ -13,13 +13,13 @@ type
   TListOfPointers = TEltPt;
   TCompare = function (a, b: Pointer): boolean;
 
-procedure push_top(var list: TListOfPointers; data: Pointer);
-procedure pop_top(var list: TListOfPointers); overload;
-function isEmpty(var list: TListOfPointers): boolean; overload;
-procedure clear(var list: TListOfPointers); overload;
+procedure push_top(var list: TListOfPointers; data: Pointer);  // O(1)
+procedure pop_top(var list: TListOfPointers); overload;  // O(1)
+function isEmpty(var list: TListOfPointers): boolean; overload;  // O(1)
+procedure clear(var list: TListOfPointers); overload;  // O(N)
 procedure push(var list: TListOfPointers; data: pointer;
-  compare: TCompare); overload;  // was NOT tested !!!
-procedure push_back(var list: TListOfPointers; data: pointer);
+  compare: TCompare); overload;  // was NOT tested !!!  // O(N)
+procedure push_back(var list: TListOfPointers; data: pointer);  // O(N)
 
 //----------------------------------------------------------------------------//
 

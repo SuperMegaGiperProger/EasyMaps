@@ -38,7 +38,7 @@ implementation
 
 procedure push(hashList: THashList; key: Variant; data: Pointer);
 begin
-  push_top(hashList.table[hashList.hashFunc(key)], data);
+  push_top(hashList.table[hashList.hashFunc(key, hashList.size)], data);
 end;
 
 function get(hashList: THashList; key: Variant; correct: TCorrectFunc): TEltPt;

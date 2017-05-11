@@ -139,17 +139,21 @@ procedure drawGraph;
 var
   it: TEltPt;
   v: TVertex;
+  i: integer;
 begin
   Form1.mapImage.Picture.Graphic := nil;
   Form1.mapImage.Canvas.Brush.Color := clRed;
   Form1.mapImage.Canvas.Pen.Color := clRed;
-  it := mapGraph;
-  while it <> nil do
+  for i := 0 to mapGraph.size - 1 do
   begin
-    v := TVertexPt(it^.data)^;
-    drawVertex(v);
-    drawAllRoads(v.edgesList);
-    it := it^.next;
+    it := mapGraph.table[i];
+    while it <> nil do
+    begin
+      v := TVertexPt(it^.data)^;
+      drawVertex(v);
+      drawAllRoads(v.edgesList);
+      it := it^.next;
+    end;
   end;
 end;
 
@@ -164,24 +168,30 @@ var
   closestVert: TVertexPt;
   it: TEltPt;
   v, mouseV: TVertex;
+  i: integer;
 begin
   result := nil;
-  if isEmpty(mapGraph) then exit;
-  it := mapGraph;
-  closestVert := TVertexPt(mapGraph^.data);
-  with mouseV do
+  for i := 0 to mapGraph.size - 1 do
   begin
-    latitude := -y * scale + latitude0;
-    longitude := x * scale + longitude0;
+    it := mapGraph.table[i];
+    if it = nil then continue;
+    closestVert := TVertexPt(it^.data);
+    with mouseV do
+    begin
+      latitude := -y * scale + latitude0;
+      longitude := x * scale + longitude0;
+    end;
+    while it <> nil do
+    begin
+      v := TVertexPt(it^.data)^;
+      if psevdoDistation(v, mouseV) < psevdoDistation(closestVert^, mouseV) then
+        closestVert := it^.data;
+      it := it^.next;
+    end;
+    if result = nil then result := closestVert;
+    if psevdoDistation(closestVert^, mouseV) < psevdoDistation(result^, mouseV) then
+      result := closestVert;
   end;
-  while it <> nil do
-  begin
-    v := TVertexPt(it^.data)^;
-    if psevdoDistation(v, mouseV) < psevdoDistation(closestVert^, mouseV) then
-      closestVert := it^.data;
-    it := it^.next;
-  end;
-  result := closestVert;
 end;
 
 var
@@ -247,10 +257,10 @@ procedure TForm1.mapImageMouseUp(Sender: TObject; Button: TMouseButton;
 var
   v: TVertexPt;
 begin
-  if isEmpty(mapGraph) then exit;
   //x := x - Form1.mapImage.Left;
   //y := y - Form1.mapImage.Top;
   v := findClosestVertex(x, y);
+  if v = nil then exit;
   Form1.mapImage.Canvas.Brush.Color := clBlue;
   Form1.mapImage.Canvas.Pen.Color := clBlue;
   drawVertex(v^);
