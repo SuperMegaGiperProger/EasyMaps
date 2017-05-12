@@ -1,0 +1,82 @@
+program Project1;
+
+{$APPTYPE CONSOLE}
+
+uses SysUtils, ComObj, Classes, XMLIntf, XMLDoc;
+ 
+const
+  DestPath = '../../dest.xml';
+  SrcPath = DestPath;
+ 
+procedure CreateDocument;
+var
+  LDocument: IXMLDocument;
+  LNodeElement, NodeCData, NodeText: IXMLNode;
+begin
+  LDocument := TXMLDocument.Create(nil);
+  LDocument.Active := True;
+ 
+  { Define document content. }
+  LDocument.DocumentElement := LDocument.CreateNode('ThisIsTheDocumentElement', ntElement, '');
+  LDocument.DocumentElement.Attributes['attrName'] := 'attrValue';
+  LNodeElement := LDocument.DocumentElement.AddChild('ThisElementHasText', -1);
+  LNodeElement.Text := 'Inner text.';
+  NodeCData := LDocument.CreateNode('any characters here', ntCData, '');
+  LDocument.DocumentElement.ChildNodes.Add(NodeCData);
+  NodeText := LDocument.CreateNode('This is a text node.', ntText, '');
+  LDocument.DocumentElement.ChildNodes.Add(NodeText);
+ 
+  LDocument.SaveToFile(DestPath);
+end;
+ 
+procedure RetrieveDocument;
+const
+  CAttrName = 'attrName';
+  HTAB = #9;
+var
+  LDocument: IXMLDocument;
+  LNodeElement, LNode: IXMLNode;
+  LAttrValue: string;
+  I: Integer;
+begin
+  LDocument := TXMLDocument.Create(nil);
+  LDocument.LoadFromFile(SrcPath); { File should exist. }
+ 
+  { Find a specific node. }
+  LNodeElement := LDocument.ChildNodes.FindNode('ThisIsTheDocumentElement');
+ 
+  if (LNodeElement <> nil) then
+  begin
+    { Get a specific attribute. }
+    Writeln('Getting attribute...');
+    if (LNodeElement.HasAttribute(CAttrName)) then
+    begin
+      LAttrValue := LNodeElement.Attributes[CAttrName];
+      Writeln('Attribute value: ' + LAttrValue);
+    end;
+ 
+    { Traverse child nodes. }
+    Writeln(sLineBreak, 'Traversing child nodes...' + sLineBreak);
+    for I := 0 to LNodeElement.ChildNodes.Count - 1 do
+    begin
+      LNode := LNodeElement.ChildNodes.Get(I);
+      { Display node name. }
+      Writeln(sLineBreak + 'Node name: ' + LNode.NodeName);
+      { Check whether the node type is Text. }
+      if LNode.NodeType = ntText then
+      begin
+        Writeln(HTAB + 'This is a node of type Text. The text is: ' + LNode.Text);
+      end;
+      { Check whether the node is text element. }
+      if LNode.IsTextElement then
+      begin
+        Writeln(HTAB + 'This is a text element. The text is: ' + LNode.Text);
+      end;
+    end;
+  end;
+end;
+
+begin
+  createDocument;
+  readln;
+end.

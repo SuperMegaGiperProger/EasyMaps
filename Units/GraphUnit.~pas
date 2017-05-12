@@ -5,11 +5,12 @@ unit GraphUnit;
 interface
 
 uses
-  listOfPointersUnit, RoadUnit, Dialogs, BinHeapUnit;
+  listOfPointersUnit, RoadUnit, Dialogs, BinHeapUnit, hashUnit;
 
 type
   TVertexPt = ^TVertex;
   TVertex = record
+    id: integer;
     latitude, longitude: real;  // coordinates
     edgesList: TListOfPointers;  // list of TEdge
     distation: real;  // distation to some vertex
@@ -25,16 +26,17 @@ type
     endPoint: TVertexPt;  // end of the edge
   end;
   TEdgePt = ^TEdge;
-  TGraphList = TListOfPointers;  // list of TVertex
+  TGraphList = THashList;  // list of TVertex
 
 const
   INF = 1000000000;  // infinity way
 var
-  mapGraph: TGraphList = nil;  // main map graph
+  mapGraph: TGraphList;  // main map graph
 
-function createVertex(latitude, longitude: real): TVertexPt;  // put vertex
-                                                              // in mapGraph
-                                                              // O(1)
+
+function createVertex(latitude, longitude: real; id: integer): TVertexPt;
+  // put vertex in mapGraph
+  // O(1)
 function createEdge(a, b: TVertexPt; weight: real;
   movingTYpe: TMovingType; road: TRoadGraphPt = nil;
   reversible: boolean = false): TEdgePt;  // O(1)
@@ -184,17 +186,21 @@ end;
 procedure preparationForGettingTheShortestWay;
 var
   it: TEltPt;
+  i: integer;
 begin
-  it := mapGraph;
-  while it <> nil do
+  for i := 0 to mapGraph.size - 1 do
   begin
-    with TVertexPt(it^.data)^ do
+    it := mapGraph.table[i];
+    while it <> nil do
     begin
-      parent := nil;
-      used := false;
-      distation := INF;
+      with TVertexPt(it^.data)^ do
+      begin
+        parent := nil;
+        used := false;
+        distation := INF;
+      end;
+      it := it^.next;
     end;
-    it := it^.next;
   end;
 end;
 
@@ -316,13 +322,14 @@ begin
     result := (TVertexPt(a)^.latitude < TVertexPt(b)^.latitude);
 end;
 
-function createVertex(latitude, longitude: real): TVertexPt;
+function createVertex(latitude, longitude: real; id: integer): TVertexPt;
 var
   newV: TVertexPt;
 begin
   new(newV);
   newV^.latitude := latitude;
   newV^.longitude := longitude;
+  newV^.id := id;
   with newV^ do
   begin
     edgesList := nil;
@@ -330,11 +337,14 @@ begin
     used := false;
     distation := INF;
   end;
-  push_top(mapGraph, newV);
+  push(mapGraph, newV^.id, newV);
   result := newV;
   //push(mapGraph, newV, compareVertices);
 end;
 
 //----------------------------------------------------------------------------//
+
+initialization
+  mapGraph := createHashList(standartHashFunc, 100);
 
 end.

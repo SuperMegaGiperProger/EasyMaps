@@ -1,0 +1,17 @@
+<trackers type="array">
+<tracker>
+<id>3</id>
+<name>issues</name>
+<default_status id="1" name="new"/>
+</tracker>
+<tracker>
+<id>1</id>
+<name>errors</name>
+<default_status id="1" name="new"/>
+</tracker>
+<tracker>
+<id>2</id>
+<name>utest</name>
+<default_status id="1" name="new"/>
+</tracker>
+</trackers>

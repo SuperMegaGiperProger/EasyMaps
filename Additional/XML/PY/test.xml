@@ -1,0 +1,19 @@
+<entry>
+  <author>
+    <name>Mark</name>
+    <uri>http://diveintomark.org/</uri>
+  </author>
+  <title>Dive into history, 2009 edition</title>
+  <link rel='alternate' type='text/html'
+    href='http://diveintomark.org/archives/2009/03/27/dive-into-history-2009-edition'/>
+  <id>tag:diveintomark.org,2009-03-27:/archives/20090327172042</id>
+  <updated>2009-03-27T21:56:07Z</updated>
+  <published>2009-03-27T17:20:42Z</published>
+  <category scheme='http://diveintomark.org' term='diveintopython'/>
+  <category scheme='http://diveintomark.org' term='docbook'/>
+  <category scheme='http://diveintomark.org' term='html'/>
+  <summary type='html'>Putting an entire chapter on one page sounds
+    bloated, but consider this &amp;mdash; my longest chapter so far
+    would be 75 printed pages, and it loads in under 5 seconds&amp;hellip;
+    On dialup.</summary>
+</entry>
