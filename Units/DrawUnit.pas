@@ -7,7 +7,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, GraphUnit, ExtCtrls, listOfPointersUnit, StdCtrls, Buttons, RoadUnit,
-  HashUnit;
+  HashUnit, Math;
 
 type
   TForm1 = class(TForm)
@@ -38,16 +38,19 @@ type
   end;
 
 const
-  STANDART_RADIUS = 0.00015;
-  STANDART_WIDTH = 0.0001;
+  STANDART_RADIUS = 0.015;
+  STANDART_WIDTH = 0.01;
 
 var
   Form1: TForm1;
-  scale: real = 0.0001;
+  scale: real = 0.001;
   latitude0: real = 53.93;
   longitude0: real =  27.58;
+  x0, y0: real;
 
 procedure drawGraph;
+function getXDecartCoordinates(longitude: real): real;
+function getYDecartCoordinates(latitude: real): real;
   
 //----------------------------------------------------------------------------//
 
@@ -55,14 +58,51 @@ implementation
 
 {$R *.dfm}
 
-function getX(longitude: real): integer;
+const
+  R: real = 6371;
+
+function radToDeg(rad: real): real;
 begin
-  result := round((longitude - longitude0) / scale);
+  result := rad * 180.0 / pi;
+end;
+
+function degToRad(deg: real): real;
+begin
+  result := deg * pi / 180.0;
+end;
+
+function getLatitude(y: real): real;
+begin
+  result := arctan(exp(y / r)) - pi / 4.0;
+  result := radToDeg(result * 2.0);
+end;
+
+function getLongitude(x: real): real;
+begin
+  result := radToDeg(x / R);
+end;
+
+function getXDecartCoordinates(longitude: real): real;
+begin
+  result := R * degToRad(longitude);
+end;
+
+function getYDecartCoordinates(latitude: real): real;
+begin
+  result := tan(pi / 4.0 + degToRad(latitude) / 2.0);
+  result := R * ln(result);
+end;
+
+function getX(longitude: real): integer;
+var
+  t: real;
+begin
+  result := round((getXDecartCoordinates(longitude) - x0) / scale);
 end;
 
 function getY(latitude: real): integer;
 begin
-  result := round((latitude0 - latitude) / scale);
+  result := round((y0 - getYDecartCoordinates(latitude)) / scale);
 end;
 
 procedure drawVertex(v: TVertex);
@@ -159,7 +199,7 @@ end;
 
 procedure TForm1.BitBtn1Click(Sender: TObject);
 begin
-  //scale := 1 / 10000;
+  //scale := 1 / 150;
   drawGraph;
 end;
 
@@ -171,16 +211,16 @@ var
   i: integer;
 begin
   result := nil;
+  with mouseV do
+  begin
+    latitude := getLatitude(-y * scale + y0);
+    longitude := getLongitude(x * scale + x0);
+  end;
   for i := 0 to mapGraph.size - 1 do
   begin
     it := mapGraph.table[i];
     if it = nil then continue;
     closestVert := TVertexPt(it^.data);
-    with mouseV do
-    begin
-      latitude := -y * scale + latitude0;
-      longitude := x * scale + longitude0;
-    end;
     while it <> nil do
     begin
       v := TVertexPt(it^.data)^;
@@ -213,7 +253,7 @@ begin
   it := way;
   while it <> nil do
   begin
-    drawRoad(TEdgePt(it^.data)^.road^, psDot, 2);
+    drawRoad(TEdgePt(it^.data)^.road^, psDot, 1);
     it := it^.next;
   end;
 end;

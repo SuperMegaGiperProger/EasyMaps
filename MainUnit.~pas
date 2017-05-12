@@ -17,22 +17,24 @@ procedure main;
 var
   a: array[0..100] of TVertexPt;
   e: array[0..100] of TEdgePt;
+  idcount: integer;
 begin
-  a[0] := createVertex(53.910859, 27.595669); //4
-  a[1] := createVertex(53.913288, 27.600737); //dion
-  a[2] := createVertex(53.919622, 27.593140); //2
-  a[3] := createVertex(53.916783, 27.586027); //cym
-  a[4] := createVertex(53.916209, 27.584859); //M
-  a[5] := createVertex(53.914977, 27.589140); //copir
+  idCount := 1;
+  a[0] := createVertex(53.910859, 27.595669, 1); //4
+  a[1] := createVertex(53.913288, 27.600737, 2); //dion
+  a[2] := createVertex(53.919622, 27.593140, 3); //2
+  a[3] := createVertex(53.916783, 27.586027, 4); //cym
+  a[4] := createVertex(53.916209, 27.584859, 5); //M
+  a[5] := createVertex(53.914977, 27.589140, 6); //copir
 
-  a[6] := createVertex(53.920940, 27.596396); //akadem
-  a[7] := createVertex(53.919116, 27.598649); //hosp
-  a[8] := createVertex(53.918635, 27.597469);
-  a[9] := createVertex(53.918483, 27.597104);
-  a[10] := createVertex(53.917887, 27.597812);
-  a[11] := createVertex(53.916884, 27.596550); //3k
+  a[6] := createVertex(53.920940, 27.596396, 7); //akadem
+  a[7] := createVertex(53.919116, 27.598649, 8); //hosp
+  a[8] := createVertex(53.918635, 27.597469, 9);
+  a[9] := createVertex(53.918483, 27.597104, 10);
+  a[10] := createVertex(53.917887, 27.597812, 11);
+  a[11] := createVertex(53.916884, 27.596550, 12); //3k
 
-  a[12] := createVertex(53.914771, 27.603885); //plat
+  a[12] := createVertex(53.914771, 27.603885,13); //plat
 
   e[8] := createEdge(a[2], a[6], 252, car, nil, true);
   createRoadVertex(e[8]^.road^, 53.920940, 27.596396);
@@ -106,8 +108,18 @@ begin
   createRoadVertex(e[7]^.road^, 53.914977, 27.589140);
 
 
-  scale := 0.00005;
+  scale := 1 / 200;
+  latitude0 := 53.920940;
+  longitude0 := 27.584859;
+  x0 := getXDecartCoordinates(longitude0) - 100;
+  y0 := getYDecartCoordinates(latitude0) - 100;
+
 end;
+
+//----------------------------------------------------------------------------//
+
+initialization
+  main;
 
 //----------------------------------------------------------------------------//
 
