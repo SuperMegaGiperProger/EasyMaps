@@ -5,7 +5,7 @@ unit MainUnit;
 interface
 
 uses
-  GraphUnit, DrawUnit, RoadUnit, GeoUnit;
+  GraphUnit, DrawUnit, GeoUnit;
 
 procedure main;
 
@@ -14,12 +14,12 @@ procedure main;
 implementation
 
 procedure main;
-var
+{var
   a: array[0..100] of TVertexPt;
   e: array[0..100] of TEdgePt;
-  idcount: integer;
+  idcount: integer;}
 begin
-  idCount := 1;
+  {idCount := 1;
   a[0] := createVertex(53.910859, 27.595669, 1); //4
   a[1] := createVertex(53.913288, 27.600737, 2); //dion
   a[2] := createVertex(53.919622, 27.593140, 3); //2
@@ -65,7 +65,7 @@ begin
   createRoadVertex
   createRoadVertex
   createRoadVertex
-  }
+
   e[1] := createEdge(a[0], a[1], 443, car, nil, true);
   //createEdge(a[0], a[1], 443, foot, e[1]^.road, true);
   createRoadVertex(e[1]^.road^, 53.910859, 27.595669);
@@ -107,7 +107,7 @@ begin
   createRoadVertex(e[7]^.road^, 53.914753, 27.588861);
   createRoadVertex(e[7]^.road^, 53.914977, 27.589140);
 
-
+                         }
   scale := 1 / 200;
   latitude0 := 53.920940;
   longitude0 := 27.584859;

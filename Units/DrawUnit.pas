@@ -6,7 +6,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, GraphUnit, ExtCtrls, listOfPointersUnit, StdCtrls, Buttons, RoadUnit,
+  Dialogs, GraphUnit, ExtCtrls, listOfPointersUnit, StdCtrls, Buttons,
   HashUnit, ShellAPI, GeoUnit, MapLoaderUnit;
 
 type
@@ -64,8 +64,6 @@ implementation
 {$R *.dfm}
 
 function getX(longitude: real): integer;
-var
-  t: real;
 begin
   result := round((getXDecartCoordinates(longitude) - x0) / scale);
 end;
@@ -89,60 +87,47 @@ begin
   Form1.mapImage.Canvas.Ellipse(x - r, y - r, x + r, y + r);
 end;
 
-procedure drawRoadPart(x1, y1, x2, y2: integer);
+procedure setStyle(movingType: TMovingType);
 begin
-  with Form1.mapImage.Canvas do
+  with Form1.mapImage.Canvas.Pen do
   begin
-    moveTo(x1, y1);
-    lineTo(x2, y2);
+    case movingType of
+      car: width := round(0.015 / scale);
+      foot: width := round(0.005 / scale);
+    end;
   end;
 end;
 
 procedure drawRoad(edge: TEdge);
-var
-  it: TEltPt;
-  x, y, r: integer;
 begin
-  ////setting road parameteres
-  with Form1.mapImage.Canvas.Pen do
-    case edge.movingType of
-      car: width := round(0.02 / scale);
-      foot: width := round(0.01 / scale);
-    end;
-  ////going along the road
-  it := edge.road^;
-  with TRoadVertexPt(it^.data)^ do
+  setStyle(edge.movingType);
+  with Form1.mapImage.Canvas do
   begin
-    x := getX(longitude);
-    y := getY(latitude);
-  end;
-  Form1.mapImage.Canvas.moveTo(x, y);
-  it := it^.next;
-  while it <> nil do
-  begin
-    with TRoadVertexPt(it^.data)^ do
-    begin
-      x := getX(longitude);
-      y := getY(latitude);
-    end;
-    with Form1.mapImage.Canvas do
-    begin
-      lineTo(x, y);
-      moveTo(x, y);
-    end;
-    it := it^.next;
+    moveTo(getX(edge.startPoint^.longitude), getY(edge.startPoint^.latitude));
+    lineTo(getX(edge.endPoint^.longitude), getY(edge.endPoint^.latitude));
   end;
 end;
 
-procedure drawAllRoads(list: TListOfPointers);
+procedure drawAllRoads(v: TVertex);
 var
   it: TEltPt;
+  x, y: integer;
 begin
-  it := list;
-  while it <> nil do
+  with Form1.mapImage.Canvas do
   begin
-    drawRoad(TEdgePt(it^.data)^);
-    it := it^.next;
+    x := getX(v.longitude);
+    y := getY(v.latitude);
+    it := v.edgesList;
+    while it <> nil do
+    begin
+      with TEdgePt(it^.data)^ do
+      begin
+        setStyle(movingType);
+        moveTo(x, y);
+        lineTo(getX(endPoint.longitude), getY(endPoint.latitude));
+      end;
+      it := it^.next;
+    end;
   end;
 end;
 
@@ -162,7 +147,7 @@ begin
     begin
       v := TVertexPt(it^.data)^;
       drawVertex(v, 0.01);
-      drawAllRoads(v.edgesList);
+      drawAllRoads(v);
       it := it^.next;
     end;
   end;
