@@ -5,7 +5,7 @@ unit GraphUnit;
 interface
 
 uses
-  listOfPointersUnit, RoadUnit, Dialogs, BinHeapUnit, hashUnit;
+  listOfPointersUnit, RoadUnit, Dialogs, BinHeapUnit, hashUnit, SysUtils;
 
 type
   TVertexPt = ^TVertex;
@@ -53,10 +53,16 @@ function getTheShortestWayThroughSeveralPoints(point: array of TVertexPt;
   // finishB = is point[size - 1] must be last on way
   // func return does way exist or not
   // O(n^2 * 2^n + n^2 * O(getTheShortestWay))  // memory O(n * 2^n)
+function correctVertex(elt: TEltPt; key: Variant): boolean;
 
 //----------------------------------------------------------------------------//
 
 implementation
+
+function correctVertex(elt: TEltPt; key: Variant): boolean;
+begin
+  result := (TVertexPt(elt^.data)^.id = integer(key));
+end;
 
 type
   TGamiltonWay = record
@@ -74,9 +80,10 @@ begin
   result^.mask := mask0 - dmask;
 end;
 
-procedure min(var a: real; b: real);  // a := min(a, b);
+function min(var a: real; b: real): boolean;  // a := min(a, b);
 begin
-  if a > b then a := b;
+  result := (a > b);
+  if result then a := b;
 end;
 
 function getTheShortestWayThroughSeveralPoints(point: array of TVertexPt;
@@ -89,18 +96,21 @@ var
   used: array of array of boolean;  // is gamilton way was used
   d: array of array of real;  // gamilton way length
   wayPart: array of array of TListOfPointers;  // way from point[i] to point[j]
+  next: array of array of integer;  // next vertex
   stack: TListOfPointers;
   it: TGamiltonWayPt;
   n, i, i0, j, mask, mask00, start, finish: integer;  // n = point number
   lastStart: integer;  // last start point which func looks through
   fn: integer;  // "false" n  // fn = point number, which func looks throught
 begin
+try
   ////preparation
   n := length(point);
   SetLength(g, n);
   SetLength(used, n);
   SetLength(d, n);
   SetLEngth(wayPart, n);
+  SetLength(next, n);
   stack := nil;
   distation := INF;
   start := 0;
@@ -119,12 +129,14 @@ begin
     SetLength(used[i], 1 shl n);
     SetLength(d[i], 1 shl n);
     SetLEngth(wayPart[i], n);
+    SetLength(next[i], 1 shl n);
     for j := 0 to n - 1 do getTheShortestWay(point[i], point[j], g[i][j],
       wayPart[i][j], movingTypeSet);
     for mask := 0 to (1 shl n) - 1 do
     begin
       d[i][mask] := INF;
       used[i][mask] := false;
+      next[i][mask] := -1;
     end;
     if finishB then d[i][0] := g[i][finish]
     else d[i][0] := 0;
@@ -149,7 +161,9 @@ begin
           if (it^.mask and (1 shl j)) <> 0 then
             if used[j][it^.mask0 - (1 shl j)] then
             begin
-              min(d[it^.i][it^.mask0], d[j][it^.mask0 - (1 shl j)] + g[it^.i][j]);
+              if min(d[it^.i][it^.mask0], d[j][it^.mask0 - (1 shl j)]
+                 + g[it^.i][j]) then
+                 next[it^.i][it^.mask0] := j;
               dec(it^.mask, 1 shl j);  // because func considered j point
             end
             else
@@ -165,12 +179,16 @@ begin
   end;
   clear(stack);
   result := (distation < INF);
-  if not result then exit;
+  if not result then
+  begin
+    ShowMessage('Путь не найден');
+    exit;
+  end;
   /////getting way
   way := nil;
   i := start;
   mask := (1 shl fn) - 1 - (1 shl start);
-  while mask <> 0 do
+  {while mask <> 0 do
     for j := 0 to fn - 1 do
       if ((mask and (1 shl j)) <> 0) and
         (d[i][mask] = d[j][mask - (1 shl j)] + g[i][j]) then
@@ -179,8 +197,24 @@ begin
         i := j;
         dec(mask, 1 shl j);
         break;
-      end;
+      end;}
+  for j := 0 to fn - 2 do
+  begin
+    if next[i][mask] = -1 then
+    begin
+      result := false;
+      exit;
+    end;
+    push_top(way, wayPart[i][next[i][mask]]);
+    i := next[i][mask];
+    dec(mask, 1 shl i);
+  end;
   if finishB then push_top(way, wayPart[i][finish]);
+except
+  on EOutOfMemory do
+    ShowMessage('Недостаточно памяти, выберите меньше пунктов следования.');
+  else ShowMessage('Ошибка исполнения');
+end;
 end;
 
 procedure preparationForGettingTheShortestWay;
@@ -346,5 +380,7 @@ end;
 
 initialization
   mapGraph := createHashList(standartHashFunc, 100);
+
+//----------------------------------------------------------------------------//
 
 end.

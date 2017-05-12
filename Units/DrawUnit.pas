@@ -7,7 +7,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, GraphUnit, ExtCtrls, listOfPointersUnit, StdCtrls, Buttons, RoadUnit,
-  HashUnit, GeoUnit;
+  HashUnit, ShellAPI, GeoUnit, MapLoaderUnit;
 
 type
   TForm1 = class(TForm)
@@ -21,6 +21,9 @@ type
     BitBtn6: TBitBtn;
     BitBtn7: TBitBtn;
     BitBtn8: TBitBtn;
+    BitBtn9: TBitBtn;
+    Label1: TLabel;
+    Label2: TLabel;
     procedure BitBtn1Click(Sender: TObject);
     procedure mapImageMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
@@ -31,6 +34,10 @@ type
     procedure BitBtn6Click(Sender: TObject);
     procedure BitBtn7Click(Sender: TObject);
     procedure BitBtn8Click(Sender: TObject);
+    procedure BitBtn9Click(Sender: TObject);
+    procedure Label2Click(Sender: TObject);
+    procedure Label2MouseEnter(Sender: TObject);
+    procedure Label2MouseLeave(Sender: TObject);
   private
     { Private declarations }
   public
@@ -232,11 +239,7 @@ var
   exist: boolean;
 begin
   exist := getTheShortestWayThroughSeveralPoints(point, dist, way, start, finish, movingTypeSet);
-  if not exist then
-  begin
-    showMessage('ѕуть не найден..');
-    exit;
-  end;
+  if not exist then exit;
   Form1.mapImage.Canvas.Brush.Color := clGreen;
   Form1.mapImage.Canvas.Pen.Color := clGreen;
   it2 := way;
@@ -310,7 +313,30 @@ procedure TForm1.BitBtn8Click(Sender: TObject);
 begin
   drawTheShortestWayTroughSeveralPoints(arr, true, true, [movType]);
 end;
-  
+
+procedure TForm1.BitBtn9Click(Sender: TObject);
+begin
+  clear(mapGraph);
+  LoadMapFromFile('map\map.txt');
+  drawGraph;
+end;
+
+procedure TForm1.Label2Click(Sender: TObject);
+begin
+  ShellExecute(Application.Handle, nil, 'http://www.openstreetmap.org/',
+    nil, nil,SW_SHOWNOACTIVATE);
+end;
+
+procedure TForm1.Label2MouseEnter(Sender: TObject);
+begin
+  Label2.Font.Style := [fsUnderline];
+end;
+
+procedure TForm1.Label2MouseLeave(Sender: TObject);
+begin
+  Label2.Font.Style := [];
+end;
+
 //----------------------------------------------------------------------------//
 
 end.

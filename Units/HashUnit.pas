@@ -31,10 +31,21 @@ function createHashList(hashFunc: THashFunc{ = STANDART_HASH_FUNC};
   size: integer = STANDART_HASH_TABLE_SIZE): THashList;
 function get(hashList: THashList; key: Variant; correct: TCorrectFunc): TEltPt;
 procedure push(hashList: THashList; key: Variant; data: Pointer); overload;
+procedure clear(hashList: THashList); overload;
 
 //----------------------------------------------------------------------------//
 
 implementation
+
+procedure clear(hashList: THashList);
+var
+  i: integer;
+begin
+  with hashList do
+  begin
+    for i := 0 to size - 1 do clear(table[i]);
+  end;
+end;
 
 procedure push(hashList: THashList; key: Variant; data: Pointer);
 begin

@@ -1,8 +1,9 @@
 object Form1: TForm1
-  Left = 1196
-  Top = 223
+  Left = 414
+  Top = 353
   Width = 679
   Height = 604
+  AlphaBlendValue = 10
   Caption = 'EasyMaps'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -27,6 +28,36 @@ object Form1: TForm1
     Height = 145
     Brush.Style = bsCross
     Pen.Style = psDot
+  end
+  object Label1: TLabel
+    Left = 448
+    Top = 544
+    Width = 201
+    Height = 17
+    AutoSize = False
+    Caption = #1043#1077#1086#1076#1072#1085#1085#1099#1077' '#1074#1079#1103#1090#1099' '#1089
+    Color = clWhite
+    ParentColor = False
+    Transparent = False
+  end
+  object Label2: TLabel
+    Left = 552
+    Top = 544
+    Width = 93
+    Height = 13
+    Caption = 'OpenStreetMap.org'
+    Color = clWhite
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clBlue
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = []
+    ParentColor = False
+    ParentFont = False
+    Transparent = True
+    OnClick = Label2Click
+    OnMouseEnter = Label2MouseEnter
+    OnMouseLeave = Label2MouseLeave
   end
   object BitBtn1: TBitBtn
     Left = 120
@@ -99,5 +130,14 @@ object Form1: TForm1
     Caption = 'BitBtn8'
     TabOrder = 7
     OnClick = BitBtn8Click
+  end
+  object BitBtn9: TBitBtn
+    Left = 8
+    Top = 56
+    Width = 75
+    Height = 25
+    Caption = 'Load'
+    TabOrder = 8
+    OnClick = BitBtn9Click
   end
 end
