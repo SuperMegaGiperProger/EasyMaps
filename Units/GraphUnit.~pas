@@ -53,10 +53,16 @@ function getTheShortestWayThroughSeveralPoints(point: array of TVertexPt;
   // finishB = is point[size - 1] must be last on way
   // func return does way exist or not
   // O(n^2 * 2^n + n^2 * O(getTheShortestWay))  // memory O(n * 2^n)
+function correctVertex(elt: TEltPt; key: Variant): boolean;
 
 //----------------------------------------------------------------------------//
 
 implementation
+
+function correctVertex(elt: TEltPt; key: Variant): boolean;
+begin
+  result := (TVeretxPt(elt^.data)^.id = integer(key));
+end;
 
 type
   TGamiltonWay = record

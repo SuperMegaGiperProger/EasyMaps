@@ -8,7 +8,8 @@ uses
   RoadUnit in 'Units\RoadUnit.pas',
   MainUnit in 'MainUnit.pas',
   BinHeapUnit in 'Units\BinHeapUnit.pas',
-  HashUnit in 'Units\HashUnit.pas';
+  HashUnit in 'Units\HashUnit.pas',
+  MapLoaderUnit in 'Units\MapLoaderUnit.pas';
 
 {$R *.res}
 

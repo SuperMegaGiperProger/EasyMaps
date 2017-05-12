@@ -61,7 +61,7 @@ implementation
 
 function correctVertex(elt: TEltPt; key: Variant): boolean;
 begin
-  result := (TVeretxPt(elt^.data)^.id = integer(key));
+  result := (TVertexPt(elt^.data)^.id = integer(key));
 end;
 
 type
