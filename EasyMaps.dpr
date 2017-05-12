@@ -9,7 +9,8 @@ uses
   MainUnit in 'MainUnit.pas',
   BinHeapUnit in 'Units\BinHeapUnit.pas',
   HashUnit in 'Units\HashUnit.pas',
-  GeoUnit in 'Units\GeoUnit.pas';
+  GeoUnit in 'Units\GeoUnit.pas',
+  MapLoaderUnit in 'Units\MapLoaderUnit.pas';
 
 {$R *.res}
 

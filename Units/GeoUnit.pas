@@ -5,7 +5,7 @@ unit GeoUnit;
 interface
 
 uses
-  math;
+  math, graphUnit;
 
 const
   R = 6371;
@@ -16,7 +16,7 @@ function getLatitude(y: real): real;
 function getLongitude(x: real): real;
 function getXDecartCoordinates(longitude: real): real;
 function getYDecartCoordinates(latitude: real): real;
-function distation(lat1, lon1, lat2, lon2: real): real;
+function distation(v1, v2: TVertexPt): real;
 
 //----------------------------------------------------------------------------//
 
@@ -54,9 +54,10 @@ begin
   result := R * ln(result);
 end;
 
-function distation(lat1, lon1, lat2, lon2: real): real;
+function distation(v1, v2: TVertexPt): real;
 begin
-  result := sin(lat1) * sin(lat2) + cos(lat1) * cos(lat2) * cos(lon2 - lon1);
+  result := sin(v1^.latitude) * sin(v2^.latitude) +
+    cos(v1^.latitude) * cos(v2^.latitude) * cos(v1^.longitude - v2^.longitude);
   result := R * arccos(result);
 end;
 

@@ -4,6 +4,9 @@ unit GeoUnit;
 
 interface
 
+uses
+  math;
+
 const
   R = 6371;
 
@@ -13,8 +16,7 @@ function getLatitude(y: real): real;
 function getLongitude(x: real): real;
 function getXDecartCoordinates(longitude: real): real;
 function getYDecartCoordinates(latitude: real): real;
-function getX(longitude: real): integer;
-function getY(latitude: real): integer;
+function distation(lat1, lon1, lat2, lon2: real): real;
 
 //----------------------------------------------------------------------------//
 
@@ -52,16 +54,10 @@ begin
   result := R * ln(result);
 end;
 
-function getX(longitude: real): integer;
-var
-  t: real;
+function distation(lat1, lon1, lat2, lon2: real): real;
 begin
-  result := round((getXDecartCoordinates(longitude) - x0) / scale);
-end;
-
-function getY(latitude: real): integer;
-begin
-  result := round((y0 - getYDecartCoordinates(latitude)) / scale);
+  result := sin(lat1) * sin(lat2) + cos(lat1) * cos(lat2) * cos(lon2 - lon1);
+  result := R * arccos(result);
 end;
 
 //----------------------------------------------------------------------------//
