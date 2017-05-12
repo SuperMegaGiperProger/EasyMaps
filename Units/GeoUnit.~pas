@@ -1,0 +1,69 @@
+unit GeoUnit;
+ 
+//----------------------------------------------------------------------------//
+
+interface
+
+const
+  R = 6371;
+
+function radToDeg(rad: real): real;
+function degToRad(deg: real): real;
+function getLatitude(y: real): real;
+function getLongitude(x: real): real;
+function getXDecartCoordinates(longitude: real): real;
+function getYDecartCoordinates(latitude: real): real;
+function getX(longitude: real): integer;
+function getY(latitude: real): integer;
+
+//----------------------------------------------------------------------------//
+
+implementation
+
+function radToDeg(rad: real): real;
+begin
+  result := rad * 180.0 / pi;
+end;
+
+function degToRad(deg: real): real;
+begin
+  result := deg * pi / 180.0;
+end;
+
+function getLatitude(y: real): real;
+begin
+  result := arctan(exp(y / r)) - pi / 4.0;
+  result := radToDeg(result * 2.0);
+end;
+
+function getLongitude(x: real): real;
+begin
+  result := radToDeg(x / R);
+end;
+
+function getXDecartCoordinates(longitude: real): real;
+begin
+  result := R * degToRad(longitude);
+end;
+
+function getYDecartCoordinates(latitude: real): real;
+begin
+  result := tan(pi / 4.0 + degToRad(latitude) / 2.0);
+  result := R * ln(result);
+end;
+
+function getX(longitude: real): integer;
+var
+  t: real;
+begin
+  result := round((getXDecartCoordinates(longitude) - x0) / scale);
+end;
+
+function getY(latitude: real): integer;
+begin
+  result := round((y0 - getYDecartCoordinates(latitude)) / scale);
+end;
+
+//----------------------------------------------------------------------------//
+
+end.

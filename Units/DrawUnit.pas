@@ -1,5 +1,5 @@
 unit DrawUnit;
- 
+
 //----------------------------------------------------------------------------//
 
 interface                   
@@ -7,7 +7,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, GraphUnit, ExtCtrls, listOfPointersUnit, StdCtrls, Buttons, RoadUnit,
-  HashUnit, Math;
+  HashUnit, GeoUnit;
 
 type
   TForm1 = class(TForm)
@@ -49,49 +49,12 @@ var
   x0, y0: real;
 
 procedure drawGraph;
-function getXDecartCoordinates(longitude: real): real;
-function getYDecartCoordinates(latitude: real): real;
   
 //----------------------------------------------------------------------------//
 
 implementation
 
 {$R *.dfm}
-
-const
-  R: real = 6371;
-
-function radToDeg(rad: real): real;
-begin
-  result := rad * 180.0 / pi;
-end;
-
-function degToRad(deg: real): real;
-begin
-  result := deg * pi / 180.0;
-end;
-
-function getLatitude(y: real): real;
-begin
-  result := arctan(exp(y / r)) - pi / 4.0;
-  result := radToDeg(result * 2.0);
-end;
-
-function getLongitude(x: real): real;
-begin
-  result := radToDeg(x / R);
-end;
-
-function getXDecartCoordinates(longitude: real): real;
-begin
-  result := R * degToRad(longitude);
-end;
-
-function getYDecartCoordinates(latitude: real): real;
-begin
-  result := tan(pi / 4.0 + degToRad(latitude) / 2.0);
-  result := R * ln(result);
-end;
 
 function getX(longitude: real): integer;
 var
@@ -105,7 +68,7 @@ begin
   result := round((y0 - getYDecartCoordinates(latitude)) / scale);
 end;
 
-procedure drawVertex(v: TVertex);
+procedure drawVertex(v: TVertex; w: real);
 var
   x, y, r: integer;
 begin
@@ -113,7 +76,7 @@ begin
   begin
     x := getX(longitude);
     y := getY(latitude);
-    r := round(STANDART_RADIUS / scale);
+    r := round(w / (2 * scale));
   end;
   Form1.mapImage.Canvas.Pen.Width := 0;
   Form1.mapImage.Canvas.Ellipse(x - r, y - r, x + r, y + r);
@@ -128,14 +91,19 @@ begin
   end;
 end;
 
-procedure drawRoad(list: TListOfPointers; style: TPenStyle; w: integer);
+procedure drawRoad(edge: TEdge);
 var
   it: TEltPt;
-  x, y: integer;
+  x, y, r: integer;
 begin
-  it := list;
-  Form1.mapImage.Canvas.Pen.Width := round(STANDART_WIDTH / scale) * w;
-  Form1.mapImage.Canvas.Pen.Style := style;
+  ////setting road parameteres
+  with Form1.mapImage.Canvas.Pen do
+    case edge.movingType of
+      car: width := round(0.02 / scale);
+      foot: width := round(0.01 / scale);
+    end;
+  ////going along the road
+  it := edge.road^;
   with TRoadVertexPt(it^.data)^ do
   begin
     x := getX(longitude);
@@ -166,11 +134,7 @@ begin
   it := list;
   while it <> nil do
   begin
-    with TEdgePt(it^.data)^ do
-      case movingType of
-        car: drawRoad(road^, psSolid, 2);
-        foot: drawRoad(road^, psDot, 1);
-      end;
+    drawRoad(TEdgePt(it^.data)^);
     it := it^.next;
   end;
 end;
@@ -190,7 +154,7 @@ begin
     while it <> nil do
     begin
       v := TVertexPt(it^.data)^;
-      drawVertex(v);
+      drawVertex(v, 0.01);
       drawAllRoads(v.edgesList);
       it := it^.next;
     end;
@@ -253,7 +217,7 @@ begin
   it := way;
   while it <> nil do
   begin
-    drawRoad(TEdgePt(it^.data)^.road^, psDot, 1);
+    drawRoad(TEdgePt(it^.data)^);
     it := it^.next;
   end;
 end;
@@ -281,7 +245,7 @@ begin
     it := TEltPt(it2^.data);
     while it <> nil do
     begin
-      drawRoad(TEdgePt(it^.data)^.road^, psDot, 2);
+      drawRoad(TEdgePt(it^.data)^);
       it := it^.next;
     end;
     it2 := it2^.next;
@@ -303,7 +267,7 @@ begin
   if v = nil then exit;
   Form1.mapImage.Canvas.Brush.Color := clBlue;
   Form1.mapImage.Canvas.Pen.Color := clBlue;
-  drawVertex(v^);
+  drawVertex(v^, 0.02);
   SetLength(arr, length(arr) + 1);
   arr[length(arr) - 1] := v;
   //start = nil then start := v

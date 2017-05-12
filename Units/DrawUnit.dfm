@@ -1,8 +1,8 @@
 object Form1: TForm1
-  Left = 1157
-  Top = 259
-  Width = 751
-  Height = 675
+  Left = 1196
+  Top = 223
+  Width = 679
+  Height = 604
   Caption = 'EasyMaps'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -14,23 +14,23 @@ object Form1: TForm1
   PixelsPerInch = 96
   TextHeight = 13
   object mapImage: TImage
-    Left = 160
-    Top = 104
+    Left = 104
+    Top = 72
     Width = 545
     Height = 489
     OnMouseUp = mapImageMouseUp
   end
   object Shape1: TShape
-    Left = 56
-    Top = 80
+    Left = 0
+    Top = 48
     Width = 1
     Height = 145
     Brush.Style = bsCross
     Pen.Style = psDot
   end
   object BitBtn1: TBitBtn
-    Left = 176
-    Top = 32
+    Left = 120
+    Top = 0
     Width = 75
     Height = 25
     Caption = 'BitBtn1'
@@ -38,8 +38,8 @@ object Form1: TForm1
     OnClick = BitBtn1Click
   end
   object BitBtn2: TBitBtn
-    Left = 328
-    Top = 48
+    Left = 272
+    Top = 16
     Width = 75
     Height = 25
     Caption = 'BitBtn2'
@@ -47,8 +47,8 @@ object Form1: TForm1
     OnClick = BitBtn2Click
   end
   object BitBtn3: TBitBtn
-    Left = 456
-    Top = 32
+    Left = 400
+    Top = 0
     Width = 75
     Height = 25
     Caption = 'BitBtn3'
@@ -56,8 +56,8 @@ object Form1: TForm1
     OnClick = BitBtn3Click
   end
   object BitBtn4: TBitBtn
-    Left = 64
-    Top = 344
+    Left = 8
+    Top = 312
     Width = 75
     Height = 25
     Caption = 'BitBtn4'
@@ -65,8 +65,8 @@ object Form1: TForm1
     OnClick = BitBtn4Click
   end
   object BitBtn5: TBitBtn
-    Left = 64
-    Top = 400
+    Left = 8
+    Top = 368
     Width = 75
     Height = 25
     Caption = 'BitBtn5'
@@ -74,8 +74,8 @@ object Form1: TForm1
     OnClick = BitBtn5Click
   end
   object BitBtn6: TBitBtn
-    Left = 64
-    Top = 448
+    Left = 8
+    Top = 416
     Width = 75
     Height = 25
     Caption = 'BitBtn6'
@@ -83,8 +83,8 @@ object Form1: TForm1
     OnClick = BitBtn6Click
   end
   object BitBtn7: TBitBtn
-    Left = 64
-    Top = 496
+    Left = 8
+    Top = 464
     Width = 75
     Height = 25
     Caption = 'BitBtn7'
@@ -92,8 +92,8 @@ object Form1: TForm1
     OnClick = BitBtn7Click
   end
   object BitBtn8: TBitBtn
-    Left = 64
-    Top = 536
+    Left = 8
+    Top = 504
     Width = 75
     Height = 25
     Caption = 'BitBtn8'
