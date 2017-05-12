@@ -50,7 +50,7 @@ begin
           id := StrToInt(str);
           v1 := TVertexPt(get(mapGraph, prevId, correctVertex)^.data);
           v2 := TVertexPt(get(mapGraph, id, correctVertex)^.data);
-          createRoadVertex(createEdge(v1, v2, distation(v1, v2), foot)^.road^,
+          createRoadVertex(createEdge(v1, v2, distation(v1, v2), foot, nil, true)^.road^,
             v2^.latitude, v2^.longitude);
           prevId := id;
         end;

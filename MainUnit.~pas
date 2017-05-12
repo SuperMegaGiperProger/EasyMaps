@@ -5,7 +5,7 @@ unit MainUnit;
 interface
 
 uses
-  GraphUnit, DrawUnit, RoadUnit;
+  GraphUnit, DrawUnit, RoadUnit, GeoUnit;
 
 procedure main;
 

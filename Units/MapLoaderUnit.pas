@@ -5,7 +5,7 @@ unit MapLoaderUnit;
 interface
 
 uses
-  GraphUnit, Dialogs, HashUnit, SysUtils, RoadUnit, GeoUnit;
+  GraphUnit, Dialogs, HashUnit, SysUtils, GeoUnit;
 
 procedure LoadMapFromFile(fileName: string);
 
@@ -50,8 +50,7 @@ begin
           id := StrToInt(str);
           v1 := TVertexPt(get(mapGraph, prevId, correctVertex)^.data);
           v2 := TVertexPt(get(mapGraph, id, correctVertex)^.data);
-          createRoadVertex(createEdge(v1, v2, distation(v1, v2), foot, nil, true)^.road^,
-            v2^.latitude, v2^.longitude);
+          createEdge(v1, v2, distation(v1, v2), foot, true);
           prevId := id;
         end;
       end;
