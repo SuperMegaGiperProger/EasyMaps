@@ -64,8 +64,6 @@ implementation
 {$R *.dfm}
 
 function getX(longitude: real): integer;
-var
-  t: real;
 begin
   result := round((getXDecartCoordinates(longitude) - x0) / scale);
 end;
@@ -87,15 +85,6 @@ begin
   end;
   Form1.mapImage.Canvas.Pen.Width := 0;
   Form1.mapImage.Canvas.Ellipse(x - r, y - r, x + r, y + r);
-end;
-
-procedure drawRoadPart(x1, y1, x2, y2: integer);
-begin
-  with Form1.mapImage.Canvas do
-  begin
-    moveTo(x1, y1);
-    lineTo(x2, y2);
-  end;
 end;
 
 procedure setStyle(movingType: TMovingType);

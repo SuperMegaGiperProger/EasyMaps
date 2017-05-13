@@ -1,6 +1,6 @@
 object Form1: TForm1
-  Left = 414
-  Top = 353
+  Left = 987
+  Top = 215
   Width = 679
   Height = 604
   AlphaBlendValue = 10

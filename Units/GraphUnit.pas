@@ -21,6 +21,7 @@ type
   TMovingTypeSet = set of TMovingType;
   TEdge = record
     weight: real;  // in meters
+    width: byte;  // only for drawing
     movingType: TMovingType;
     startPoint: TVertexPt;
     endPoint: TVertexPt;
@@ -37,7 +38,7 @@ var
 function createVertex(latitude, longitude: real; id: int64): TVertexPt;
   // put vertex in mapGraph
   // O(1)
-function createEdge(a, b: TVertexPt; weight: real;
+function createEdge(a, b: TVertexPt; weight: real; width: byte;
   movingTYpe: TMovingType; reversible: boolean = false): TEdgePt;  // O(1)
 function psevdoDistation(a, b: TVertex): real;  // "distation" in degrees
 function getTheShortestWay(s, f: TVertexPt; out distation: real;
@@ -308,7 +309,8 @@ begin
   while itV^.parent <> nil do
   begin
     itV2 := itV^.parent^.edgesList;
-    while (itV2 <> nil) and (TEdgePt(itV2^.data)^.endPoint <> itV) do
+    while (itV2 <> nil) and ((TEdgePt(itV2^.data)^.endPoint <> itV) or
+      not (TEdgePt(itV2^.data)^.movingType in movingTypeSet)) do
       itV2 := itV2^.next;
     if (itV2 = nil) or (TEdgePt(itV2^.data)^.endPoint <> itV) then
     begin
@@ -326,20 +328,21 @@ begin
     (a.longitude - b.longitude) * (a.longitude - b.longitude));
 end;
 
-function createEdge(a, b: TVertexPt; weight: real;
+function createEdge(a, b: TVertexPt; weight: real; width: byte;
   movingTYpe: TMovingType; reversible: boolean = false): TEdgePt;
 var
   newE: TEdgePt;
 begin
   new(newE);
   newE^.weight := weight;
+  newE^.width := width;
   newE^.movingType := movingType;
   newE^.startPoint := a;
   newE^.endPoint := b;
   push_top(a^.edgesList, newE);
   result := newE;
   if reversible then
-    createEdge(b, a, weight, movingType);
+    createEdge(b, a, weight, width, movingType);
   //if movingType = car then createEdge(a, b, weight, foot, true);
 end;
 
