@@ -1,6 +1,6 @@
 object Form1: TForm1
-  Left = 987
-  Top = 215
+  Left = 1161
+  Top = 248
   Width = 679
   Height = 604
   AlphaBlendValue = 10
@@ -12,6 +12,8 @@ object Form1: TForm1
   Font.Name = 'MS Sans Serif'
   Font.Style = []
   OldCreateOrder = False
+  OnMouseWheelDown = FormMouseWheelDown
+  OnMouseWheelUp = FormMouseWheelUp
   PixelsPerInch = 96
   TextHeight = 13
   object mapImage: TImage
@@ -19,6 +21,8 @@ object Form1: TForm1
     Top = 72
     Width = 545
     Height = 489
+    OnMouseDown = mapImageMouseDown
+    OnMouseMove = mapImageMouseMove
     OnMouseUp = mapImageMouseUp
   end
   object Shape1: TShape
@@ -61,7 +65,7 @@ object Form1: TForm1
   end
   object BitBtn1: TBitBtn
     Left = 120
-    Top = 0
+    Top = 16
     Width = 75
     Height = 25
     Caption = 'BitBtn1'
@@ -78,8 +82,8 @@ object Form1: TForm1
     OnClick = BitBtn2Click
   end
   object BitBtn3: TBitBtn
-    Left = 400
-    Top = 0
+    Left = 392
+    Top = 16
     Width = 75
     Height = 25
     Caption = 'BitBtn3'

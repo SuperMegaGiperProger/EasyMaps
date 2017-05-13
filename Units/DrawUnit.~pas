@@ -38,6 +38,14 @@ type
     procedure Label2Click(Sender: TObject);
     procedure Label2MouseEnter(Sender: TObject);
     procedure Label2MouseLeave(Sender: TObject);
+    procedure mapImageMouseMove(Sender: TObject; Shift: TShiftState; X,
+      Y: Integer);
+    procedure mapImageMouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure FormMouseWheelDown(Sender: TObject; Shift: TShiftState;
+      MousePos: TPoint; var Handled: Boolean);
+    procedure FormMouseWheelUp(Sender: TObject; Shift: TShiftState;
+      MousePos: TPoint; var Handled: Boolean);
   private
     { Private declarations }
   public
@@ -45,8 +53,10 @@ type
   end;
 
 const
-  STANDART_RADIUS = 0.015;
-  STANDART_WIDTH = 0.01;
+  STANDART_RADIUS = 0.00005;
+  STANDART_WIDTH = 0.0035;
+  MAX_SCALE = 0.01;
+  MIN_SCALE = 0.0005;
 
 var
   Form1: TForm1;
@@ -54,6 +64,7 @@ var
   latitude0: real = 53.93;
   longitude0: real =  27.58;
   x0, y0: real;
+  way: TListOfPointers = nil;
 
 procedure drawGraph;
   
@@ -73,7 +84,7 @@ begin
   result := round((y0 - getYDecartCoordinates(latitude)) / scale);
 end;
 
-procedure drawVertex(v: TVertex; w: real);
+procedure drawVertex(v: TVertex; w: real = STANDART_RADIUS);
 var
   x, y, r: integer;
 begin
@@ -87,22 +98,23 @@ begin
   Form1.mapImage.Canvas.Ellipse(x - r, y - r, x + r, y + r);
 end;
 
-procedure setStyle(movingType: TMovingType);
+procedure setStyle(edge: TEdge);
 begin
-  with Form1.mapImage.Canvas.Pen do
+  with Form1.mapImage.Canvas do
   begin
-    case movingType of
-      car: width := round(0.015 / scale);
-      foot: width := round(0.005 / scale);
+    case edge.movingType of
+      car: Pen.width := round(edge.width * STANDART_WIDTH / scale);
+      foot: Pen.width := round(edge.width * STANDART_WIDTH / scale);
     end;
   end;
 end;
 
 procedure drawRoad(edge: TEdge);
 begin
-  setStyle(edge.movingType);
+  setStyle(edge);
   with Form1.mapImage.Canvas do
   begin
+    if Pen.Width <= 0 then exit;
     moveTo(getX(edge.startPoint^.longitude), getY(edge.startPoint^.latitude));
     lineTo(getX(edge.endPoint^.longitude), getY(edge.endPoint^.latitude));
   end;
@@ -120,14 +132,34 @@ begin
     it := v.edgesList;
     while it <> nil do
     begin
-      with TEdgePt(it^.data)^ do
-      begin
-        setStyle(movingType);
-        moveTo(x, y);
-        lineTo(getX(endPoint.longitude), getY(endPoint.latitude));
-      end;
+      setStyle(TEdgePt(it^.data)^);
+      if Pen.Width > 0 then
+        with TEdgePt(it^.data)^ do
+        begin
+          moveTo(x, y);
+          lineTo(getX(endPoint.longitude), getY(endPoint.latitude));
+        end;
       it := it^.next;
     end;
+  end;
+end;
+
+procedure drawWay(way: TListOfPointers);
+var
+  it, it2: TEltPt;
+begin
+  Form1.mapImage.Canvas.Brush.Color := clGreen;
+  Form1.mapImage.Canvas.Pen.Color := clGreen;
+  it2 := way;
+  while it2 <> nil do
+  begin
+    it := TEltPt(it2^.data);
+    while it <> nil do
+    begin
+      drawRoad(TEdgePt(it^.data)^);
+      it := it^.next;
+    end;
+    it2 := it2^.next;
   end;
 end;
 
@@ -146,11 +178,12 @@ begin
     while it <> nil do
     begin
       v := TVertexPt(it^.data)^;
-      drawVertex(v, 0.01);
+      drawVertex(v);
       drawAllRoads(v);
       it := it^.next;
     end;
   end;
+  drawWay(way);
 end;
 
 procedure TForm1.BitBtn1Click(Sender: TObject);
@@ -193,62 +226,63 @@ end;
 var
   start: TVertexPt;
 
-procedure drawTheShortestWay(s, f: TVertexPt; movingTypeSet: TMovingTypeSet);
-var
-  it: TEltPt;
-  dist: real;
-  way: TListOfPointers;
-begin
-  if not getTheShortestWay(s, f, dist, way, movingTypeSet) then
-  begin
-    showMessage('ѕуть не найден..');
-    exit;
-  end;
-  Form1.mapImage.Canvas.Brush.Color := clGreen;
-  Form1.mapImage.Canvas.Pen.Color := clGreen;
-  it := way;
-  while it <> nil do
-  begin
-    drawRoad(TEdgePt(it^.data)^);
-    it := it^.next;
-  end;
-end;
-
 procedure drawTheShortestWayTroughSeveralPoints(point: array of TVertexPt;
   start: boolean = false; finish: boolean = false;
   movingTypeSet: TMovingTypeSet = [car, foot, plane]);
 var
-  it, it2: TEltPt;
   dist: real;
-  way: TListOfPointers;
   exist: boolean;
 begin
   exist := getTheShortestWayThroughSeveralPoints(point, dist, way, start, finish, movingTypeSet);
   if not exist then exit;
-  Form1.mapImage.Canvas.Brush.Color := clGreen;
-  Form1.mapImage.Canvas.Pen.Color := clGreen;
-  it2 := way;
-  while it2 <> nil do
-  begin
-    it := TEltPt(it2^.data);
-    while it <> nil do
-    begin
-      drawRoad(TEdgePt(it^.data)^);
-      it := it^.next;
-    end;
-    it2 := it2^.next;
-  end;
+  drawWay(way);
 end;
 
 var
   movType: TMovingType = car;
   arr: array of TVertexPt;
 
+var
+  move, itWasMoving: boolean;
+  xm, ym: integer;
+
+procedure TForm1.mapImageMouseMove(Sender: TObject; Shift: TShiftState; X,
+  Y: Integer);
+begin
+  if not move then exit;
+  with Form1.mapImage do
+  begin
+    //if not ((x0 > rightBorder - Width) or (x0 < leftBorder)) then
+    x0 := x0 + (xm - x) * scale;
+    minimize(x0, rightBorder - Width * scale);
+    maximize(x0, leftBorder);
+    //if not ((y0 > topBorder) or (y0 < bottomBorder + Height)) then
+    y0 := y0 - (ym - y) * scale;
+    minimize(y0, topBorder);
+    maximize(y0, bottomBorder + Height * scale);
+  end;
+  drawGraph;
+  xm := x;
+  ym := y;
+  itWasMoving := true;
+end;
+
+procedure TForm1.mapImageMouseDown(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+  xm := x;
+  ym := y;
+  move := true;
+  itWasMoving := false;
+end;
+
 procedure TForm1.mapImageMouseUp(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 var
   v: TVertexPt;
 begin
+  move := false;
+  if itWasMoving then exit;
   //x := x - Form1.mapImage.Left;
   //y := y - Form1.mapImage.Top;
   v := findClosestVertex(x, y);
@@ -320,6 +354,36 @@ end;
 procedure TForm1.Label2MouseLeave(Sender: TObject);
 begin
   Label2.Font.Style := [];
+end;
+
+function onMap(MousePos: TPoint): boolean;
+begin
+  with form1 do
+    with MousePos do
+      result := not ((X < Left + mapImage.Left) or
+        (X > Left + mapImage.Left + width) or
+        (Y < top + mapImage.Top) or (Y > top + mapImage.Top + height));
+end;
+
+const
+  dScale = 0.0001;
+
+procedure TForm1.FormMouseWheelDown(Sender: TObject; Shift: TShiftState;
+  MousePos: TPoint; var Handled: Boolean);
+begin
+  if scale >= MAX_SCALE then exit;
+  if not onMap(MousePos) then exit;
+  scale := scale + dScale;
+  drawGraph;
+end;
+
+procedure TForm1.FormMouseWheelUp(Sender: TObject; Shift: TShiftState;
+  MousePos: TPoint; var Handled: Boolean);
+begin
+  if scale <= MIN_SCALE then exit;
+  if not onMap(MousePos) then exit;
+  scale := scale - dScale;
+  drawGraph;
 end;
 
 //----------------------------------------------------------------------------//

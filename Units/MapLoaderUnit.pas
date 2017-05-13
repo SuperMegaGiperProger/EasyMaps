@@ -7,7 +7,10 @@ interface
 uses
   GraphUnit, Dialogs, HashUnit, SysUtils, GeoUnit;
 
-procedure LoadMapFromFile(fileName: string);
+var
+  topBorder, bottomBorder, leftBorder, rightBorder: real;  // in Decart coord
+
+function LoadMapFromFile(fileName: string): boolean;
 
 //----------------------------------------------------------------------------//
 
@@ -20,7 +23,7 @@ begin
   else if str = 'plane' then result := plane;
 end;
 
-procedure LoadMapFromFile(fileName: string);
+function LoadMapFromFile(fileName: string): boolean;
 var
   f: TextFile;
   str: string;
@@ -30,7 +33,13 @@ var
   rev: boolean;
   width: byte;
   mov: TMovingType;
+  maxLat, minLat, maxLon, minLon: real;
 begin
+  maxLat := -90;
+  minLat := 90;
+  maxLon := -180;
+  minLon := 180;
+  result := true;
   try
     Assign(f, fileName);
     Reset(f);
@@ -45,6 +54,10 @@ begin
         id := StrToInt64(str);
         readln(f, lat);
         readln(f, lon);
+        maximize(maxLat, lat);
+        minimize(minLat, lat);
+        maximize(maxLon, lon);
+        minimize(minLon, lon);
         createVertex(lat, lon, id);
       end;
       if eof(f) then showMessage('endoffile');
@@ -78,12 +91,18 @@ begin
       end;
     except
       ShowMessage('Некорректный файл');
+      result := false;
       //on E : Exception do
         //ShowMessage(E.ClassName+' ошибка с сообщением : '+E.Message);
     end;
   except
     ShowMessage('Ошибка чтения файла');
+    result := false;
   end;
+  leftBorder := getXDecartCoordinates(minLon);
+  rightBorder := getXDecartCoordinates(maxLon);
+  bottomBorder := getYDecartCoordinates(minLat);
+  topBorder := getYDecartCoordinates(maxLat);
 end;
 
 //----------------------------------------------------------------------------//
