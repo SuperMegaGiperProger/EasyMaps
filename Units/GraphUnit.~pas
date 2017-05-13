@@ -10,15 +10,15 @@ uses
 type
   TVertexPt = ^TVertex;
   TVertex = record
-    id: integer;
+    id: int64;
     latitude, longitude: real;  // coordinates
     edgesList: TListOfPointers;  // list of TEdge
     distation: real;  // distation to some vertex
     parent: TVertexPt;  // vertex from which we came
     used: boolean;  // flag
   end;
-  TMovingType = (plane, car, foot);     // you can go by foot beside a car road
-  TMovingTypeSet = set of TMovingType;  // in any direction
+  TMovingType = (plane, car, foot);
+  TMovingTypeSet = set of TMovingType;
   TEdge = record
     weight: real;  // in meters
     movingType: TMovingType;
@@ -60,7 +60,7 @@ implementation
 
 function correctVertex(elt: TEltPt; key: Variant): boolean;
 begin
-  result := (TVertexPt(elt^.data)^.id = integer(key));
+  result := (TVertexPt(elt^.data)^.id = int64(key));
 end;
 
 type
@@ -334,12 +334,13 @@ begin
   new(newE);
   newE^.weight := weight;
   newE^.movingType := movingType;
+  newE^.startPoint := a;
   newE^.endPoint := b;
   push_top(a^.edgesList, newE);
   result := newE;
   if reversible then
     createEdge(b, a, weight, movingType);
-  if movingType = car then createEdge(a, b, weight, foot, true);
+  //if movingType = car then createEdge(a, b, weight, foot, true);
 end;
 
 function compareVertices(a, b: Pointer): boolean;
@@ -350,7 +351,7 @@ begin
     result := (TVertexPt(a)^.latitude < TVertexPt(b)^.latitude);
 end;
 
-function createVertex(latitude, longitude: real; id: integer): TVertexPt;
+function createVertex(latitude, longitude: real; id: int64): TVertexPt;
 var
   newV: TVertexPt;
 begin

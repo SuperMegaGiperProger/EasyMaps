@@ -17,7 +17,7 @@ procedure LoadMapFromFile(fileName: string);
 var
   f: TextFile;
   str: string;
-  id, prevId: integer;
+  id: int64;
   lat, lon: real;
   v1, v2: TVertexPt;
 begin
@@ -32,30 +32,33 @@ begin
       begin
         readln(f, str);
         if str = '' then break;
-        id := StrToInt(str);
+        id := StrToInt64(str);
         readln(f, lat);
         readln(f, lon);
         createVertex(lat, lon, id);
       end;
+      if eof(f) then showMessage('endoffile');
       repeat
         readln(f, str);
       until str = 'edges';
       while not eof(f) do
       begin
-        readln(f, prevId);
+        readln(f, id);
+        v1 := TVertexPt(get(mapGraph, id, correctVertex)^.data);
         while not eof(f) do
         begin
           readln(f, str);
           if str = '' then break;
-          id := StrToInt(str);
-          v1 := TVertexPt(get(mapGraph, prevId, correctVertex)^.data);
+          id := StrToInt64(str);
           v2 := TVertexPt(get(mapGraph, id, correctVertex)^.data);
           createEdge(v1, v2, distation(v1, v2), foot, true);
-          prevId := id;
+          v1 := v2;
         end;
       end;
     except
-      ShowMessage('Некорректный файл');
+      //ShowMessage('Некорректный файл');
+      on E : Exception do
+        ShowMessage(E.ClassName+' ошибка с сообщением : '+E.Message);
     end;
   except
     ShowMessage('Ошибка чтения файла');

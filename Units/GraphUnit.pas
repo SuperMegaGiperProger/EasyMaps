@@ -10,7 +10,7 @@ uses
 type
   TVertexPt = ^TVertex;
   TVertex = record
-    id: integer;
+    id: int64;
     latitude, longitude: real;  // coordinates
     edgesList: TListOfPointers;  // list of TEdge
     distation: real;  // distation to some vertex
@@ -34,7 +34,7 @@ var
   mapGraph: TGraphList;  // main map graph
 
 
-function createVertex(latitude, longitude: real; id: integer): TVertexPt;
+function createVertex(latitude, longitude: real; id: int64): TVertexPt;
   // put vertex in mapGraph
   // O(1)
 function createEdge(a, b: TVertexPt; weight: real;
@@ -60,7 +60,7 @@ implementation
 
 function correctVertex(elt: TEltPt; key: Variant): boolean;
 begin
-  result := (TVertexPt(elt^.data)^.id = integer(key));
+  result := (TVertexPt(elt^.data)^.id = key);
 end;
 
 type
@@ -351,7 +351,7 @@ begin
     result := (TVertexPt(a)^.latitude < TVertexPt(b)^.latitude);
 end;
 
-function createVertex(latitude, longitude: real; id: integer): TVertexPt;
+function createVertex(latitude, longitude: real; id: int64): TVertexPt;
 var
   newV: TVertexPt;
 begin
