@@ -87,20 +87,20 @@ begin
   Form1.mapImage.Canvas.Ellipse(x - r, y - r, x + r, y + r);
 end;
 
-procedure setStyle(movingType: TMovingType);
+procedure setStyle(edge: TEdge);
 begin
-  with Form1.mapImage.Canvas.Pen do
+  with Form1.mapImage.Canvas do
   begin
-    case movingType of
-      car: width := round(0.015 / scale);
-      foot: width := round(0.005 / scale);
+    case edge.movingType of
+      car: Pen.width := edge.width * round(0.005 / scale);
+      foot: Pen.width := edge.width * round(0.005 / scale);
     end;
   end;
 end;
 
 procedure drawRoad(edge: TEdge);
 begin
-  setStyle(edge.movingType);
+  setStyle(edge);
   with Form1.mapImage.Canvas do
   begin
     moveTo(getX(edge.startPoint^.longitude), getY(edge.startPoint^.latitude));
@@ -120,9 +120,9 @@ begin
     it := v.edgesList;
     while it <> nil do
     begin
+      setStyle(TEdgePt(it^.data)^);
       with TEdgePt(it^.data)^ do
       begin
-        setStyle(movingType);
         moveTo(x, y);
         lineTo(getX(endPoint.longitude), getY(endPoint.latitude));
       end;
