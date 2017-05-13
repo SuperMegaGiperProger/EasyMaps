@@ -74,8 +74,12 @@ begin
 end;
 
 function standartHashFunc(key: variant; arg: variant): integer;
+var
+  k, s: int64;
 begin
-  result := integer(key) mod integer(arg);
+  k := key;
+  s := arg;
+  result := k mod s;
 end;
 
 //----------------------------------------------------------------------------//

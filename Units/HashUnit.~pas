@@ -44,9 +44,6 @@ begin
   with hashList do
   begin
     for i := 0 to size - 1 do clear(table[i]);
-    size := 0;
-    memSize := 0;
-    SetLength(table, 0);
   end;
 end;
 
