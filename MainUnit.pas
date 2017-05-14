@@ -108,7 +108,7 @@ begin
   createRoadVertex(e[7]^.road^, 53.914977, 27.589140);
 
                          }
-  scale := 1 / 200;
+  scale := 1 / 400;
   latitude0 := 53.920940;
   longitude0 := 27.584859;
   x0 := getXDecartCoordinates(longitude0) - 0.1;

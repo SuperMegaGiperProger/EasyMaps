@@ -1,6 +1,6 @@
 object Form1: TForm1
-  Left = 1161
-  Top = 248
+  Left = 1202
+  Top = 304
   Width = 679
   Height = 604
   AlphaBlendValue = 10
@@ -62,6 +62,34 @@ object Form1: TForm1
     OnClick = Label2Click
     OnMouseEnter = Label2MouseEnter
     OnMouseLeave = Label2MouseLeave
+  end
+  object SpeedButton1: TSpeedButton
+    Left = 616
+    Top = 448
+    Width = 23
+    Height = 22
+    Caption = '+'
+    Font.Charset = RUSSIAN_CHARSET
+    Font.Color = clBlack
+    Font.Height = -16
+    Font.Name = 'Arial'
+    Font.Style = [fsBold]
+    ParentFont = False
+    OnClick = SpeedButton1Click
+  end
+  object SpeedButton2: TSpeedButton
+    Left = 616
+    Top = 472
+    Width = 23
+    Height = 22
+    Caption = '-'
+    Font.Charset = RUSSIAN_CHARSET
+    Font.Color = clBlack
+    Font.Height = -19
+    Font.Name = 'Arial'
+    Font.Style = [fsBold]
+    ParentFont = False
+    OnClick = SpeedButton2Click
   end
   object BitBtn1: TBitBtn
     Left = 120
@@ -143,5 +171,13 @@ object Form1: TForm1
     Caption = 'Load'
     TabOrder = 8
     OnClick = BitBtn9Click
+  end
+  object BitBtn10: TBitBtn
+    Left = 576
+    Top = 32
+    Width = 75
+    Height = 25
+    Caption = 'BitBtn10'
+    TabOrder = 9
   end
 end

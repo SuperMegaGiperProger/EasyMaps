@@ -7,7 +7,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, GraphUnit, ExtCtrls, listOfPointersUnit, StdCtrls, Buttons,
-  HashUnit, ShellAPI, GeoUnit, MapLoaderUnit;
+  HashUnit, ShellAPI, GeoUnit, MapLoaderUnit, Math;
 
 type
   TForm1 = class(TForm)
@@ -24,6 +24,9 @@ type
     BitBtn9: TBitBtn;
     Label1: TLabel;
     Label2: TLabel;
+    BitBtn10: TBitBtn;
+    SpeedButton1: TSpeedButton;
+    SpeedButton2: TSpeedButton;
     procedure BitBtn1Click(Sender: TObject);
     procedure mapImageMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
@@ -46,6 +49,8 @@ type
       MousePos: TPoint; var Handled: Boolean);
     procedure FormMouseWheelUp(Sender: TObject; Shift: TShiftState;
       MousePos: TPoint; var Handled: Boolean);
+    procedure SpeedButton1Click(Sender: TObject);
+    procedure SpeedButton2Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -98,6 +103,44 @@ begin
   Form1.mapImage.Canvas.Ellipse(x - r, y - r, x + r, y + r);
 end;
 
+procedure drawPoint(x, y, num: integer);
+var
+  pc: TBitmap;
+begin
+  with Form1.mapImage.Canvas do
+  begin
+    pc := TBitmap.Create;
+    pc.LoadFromFile('Images\point.bmp');
+    pc.Transparent := true;
+    Draw(x - pc.Width div 2, y - pc.Height, pc);
+    pc.Free;
+    Font.Name := 'Arial';
+    Font.Style := [fsBold];
+    Brush.Style := bsClear;
+    TextOut(x - length(IntToStr(num)) * 3 - 1, y - 26, IntToStr(num));
+  end;
+end;
+
+procedure drawArrow(x, y: integer; angle: real = 0; length: integer = 20);
+var
+  stx, sty: integer;
+begin
+  with Form1.mapImage.Canvas do
+  begin
+    moveTo(x, y);
+    lineTo(x - round(length * cos(angle)), y - round(length * sin(angle)));
+    stx := x - round(length * cos(angle) / 1.2);
+    sty := y - round(length * sin(angle) / 1.2);
+    angle := angle + pi / 2;
+    moveTo(x, y);
+    lineTo(stx - round(length * cos(angle) / 2),
+      sty - round(length * sin(angle) / 4));
+    moveTo(x, y);
+    lineTo(stx + round(length * cos(angle) / 2),
+      sty + round(length * sin(angle) / 4));
+  end;
+end;
+
 procedure setStyle(edge: TEdge);
 begin
   with Form1.mapImage.Canvas do
@@ -109,14 +152,34 @@ begin
   end;
 end;
 
-procedure drawRoad(edge: TEdge);
+procedure drawRoad(edge: TEdge; direction: boolean = false);
+var
+  x1, x2, y1, y2, len: integer;
+  angle: real;
 begin
   setStyle(edge);
+  if Form1.mapImage.Canvas.Pen.Width <= 0 then exit;
+  x1 := getX(edge.startPoint^.longitude);
+  y1 := getY(edge.startPoint^.latitude);
+  x2 := getX(edge.endPoint^.longitude);
+  y2 := getY(edge.endPoint^.latitude);
+  if direction then
+  begin
+    len := 10;
+    if sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)) < len + 20 then exit;
+    if x1 = x2 then angle := pi / 2
+    else angle := arctan((y2 - y1) * 1.0 / ((x2 - x1) * 1.0));
+    if x2 - x1 < 0 then angle := angle + pi;
+    Form1.mapImage.Canvas.Pen.Color := clBlack;
+    Form1.mapImage.Canvas.Pen.Width := 2;
+    drawArrow(x2 - (x2 - x1) div 2 + round((len + 15) * cos(angle) / 2),
+      y2 - (y2 - y1) div 2 + round((len + 15) * sin(angle) / 2), angle, len);
+    exit;
+  end;
   with Form1.mapImage.Canvas do
   begin
-    if Pen.Width <= 0 then exit;
-    moveTo(getX(edge.startPoint^.longitude), getY(edge.startPoint^.latitude));
-    lineTo(getX(edge.endPoint^.longitude), getY(edge.endPoint^.latitude));
+    moveTo(x1, y1);
+    lineTo(x2, y2);
   end;
 end;
 
@@ -144,24 +207,35 @@ begin
   end;
 end;
 
-procedure drawWay(way: TListOfPointers);
+procedure drawWay(way: TListOfPointers; direction: boolean = false);
 var
   it, it2: TEltPt;
 begin
-  Form1.mapImage.Canvas.Brush.Color := clGreen;
-  Form1.mapImage.Canvas.Pen.Color := clGreen;
   it2 := way;
   while it2 <> nil do
   begin
     it := TEltPt(it2^.data);
     while it <> nil do
     begin
-      drawRoad(TEdgePt(it^.data)^);
+      Form1.mapImage.Canvas.Pen.Color := clGreen;
+      drawRoad(TEdgePt(it^.data)^, direction);
       it := it^.next;
     end;
     it2 := it2^.next;
   end;
 end;
+
+procedure drawPoints(point: array of TVertexPt);
+var
+  i: integer;
+begin
+  for i := 0 to length(point) - 1 do
+    drawPoint(getX(point[i]^.longitude), getY(point[i]^.latitude), i + 1);
+end;
+
+var
+  movType: TMovingType = car;
+  arr: array of TVertexPt;
 
 procedure drawGraph;
 var
@@ -184,6 +258,8 @@ begin
     end;
   end;
   drawWay(way);
+  drawWay(way, true);
+  drawPoints(arr);
 end;
 
 procedure TForm1.BitBtn1Click(Sender: TObject);
@@ -223,9 +299,6 @@ begin
   end;
 end;
 
-var
-  start: TVertexPt;
-
 procedure drawTheShortestWayTroughSeveralPoints(point: array of TVertexPt;
   start: boolean = false; finish: boolean = false;
   movingTypeSet: TMovingTypeSet = [car, foot, plane]);
@@ -235,12 +308,8 @@ var
 begin
   exist := getTheShortestWayThroughSeveralPoints(point, dist, way, start, finish, movingTypeSet);
   if not exist then exit;
-  drawWay(way);
+  drawgraph;
 end;
-
-var
-  movType: TMovingType = car;
-  arr: array of TVertexPt;
 
 var
   move, itWasMoving: boolean;
@@ -283,28 +352,22 @@ var
 begin
   move := false;
   if itWasMoving then exit;
-  //x := x - Form1.mapImage.Left;
-  //y := y - Form1.mapImage.Top;
   v := findClosestVertex(x, y);
   if v = nil then exit;
   Form1.mapImage.Canvas.Brush.Color := clBlue;
   Form1.mapImage.Canvas.Pen.Color := clBlue;
-  drawVertex(v^, 0.02);
   SetLength(arr, length(arr) + 1);
   arr[length(arr) - 1] := v;
-  //start = nil then start := v
-  //else drawTheShortestWay(start, v, [movType]);
+  drawPoint(x, y, length(arr));
 end;
 
 procedure TForm1.BitBtn2Click(Sender: TObject);
 begin
-  start := nil;
   movType := car;
 end;
 
 procedure TForm1.BitBtn3Click(Sender: TObject);
 begin
-  start := nil;
   movType := foot;
 end;
 
@@ -383,6 +446,20 @@ begin
   if scale <= MIN_SCALE then exit;
   if not onMap(MousePos) then exit;
   scale := scale - dScale;
+  drawGraph;
+end;
+
+procedure TForm1.SpeedButton1Click(Sender: TObject);
+begin
+  if scale <= MIN_SCALE then exit;
+  scale := scale - dScale;
+  drawGraph;
+end;
+
+procedure TForm1.SpeedButton2Click(Sender: TObject);
+begin       
+  if scale >= MAX_SCALE then exit;
+  scale := scale + dScale;
   drawGraph;
 end;
 
