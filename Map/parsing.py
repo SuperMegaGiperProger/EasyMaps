@@ -1,14 +1,16 @@
 import xml.etree.ElementTree as etree
 
-tree = etree.parse('map.osm')
+fname = input('Filename: ')
+
+tree = etree.parse(fname + '.osm')
 root = tree.getroot()
 
 vertices = set()
 edges = []
-w = {'motorway' : '3', 'trunk' : '2', 'primary' : '2', 'secondary' : '2', 'tertiary' : '2', ' 	unclassified' : '1', 'residential' : '1', 'service' : '1', 'track' : '1'}
+w = {'motorway' : '3', 'trunk' : '2', 'primary' : '2', 'secondary' : '2', 'tertiary' : '2', 'unclassified' : '1', 'residential' : '1', 'service' : '1', 'track' : '1'}
 
 for way in root.findall('way'):
-    if way.attrib['visible'] == 'false': continue
+    #if way.attrib['visible'] == 'false': continue
     exist = False
     rever = False
     revch = False
@@ -26,9 +28,9 @@ for way in root.findall('way'):
         if k == 'sidewalk':
             if v != 'no': sidewalk = True
         if k == 'lanes':
-            weight = v
-            weich = True
-            continue
+        	weight = v[0]
+        	weich = True
+        	continue
         if k == 'highway':
             if v == 'road':
                 exist = False
@@ -73,7 +75,7 @@ for way in root.findall('way'):
         edges[-1][1] = '1'
         edges[-1][2] = True
 
-f = open('map.txt', 'w')
+f = open(fname + '.txt', 'w')
 f.write('vertices\n')
 # id
 # lat

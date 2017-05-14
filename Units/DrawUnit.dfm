@@ -180,4 +180,11 @@ object Form1: TForm1
     Caption = 'BitBtn10'
     TabOrder = 9
   end
+  object OpenDialog1: TOpenDialog
+    FileName = 
+      'Z:\mnt\4CC4F1C5C4F1B176\Projects\Delphi '#1054#1040#1080#1055' 2\CourseWork_2sem\M' +
+      'ap\map.txt'
+    Left = 40
+    Top = 16
+  end
 end

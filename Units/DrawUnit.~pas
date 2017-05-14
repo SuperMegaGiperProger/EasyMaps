@@ -27,6 +27,7 @@ type
     BitBtn10: TBitBtn;
     SpeedButton1: TSpeedButton;
     SpeedButton2: TSpeedButton;
+    OpenDialog1: TOpenDialog;
     procedure BitBtn1Click(Sender: TObject);
     procedure mapImageMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
@@ -166,14 +167,14 @@ begin
   if direction then
   begin
     len := 10;
-    if sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)) < len + 8 then exit;
+    if sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)) < len + 20 then exit;
     if x1 = x2 then angle := pi / 2
     else angle := arctan((y2 - y1) * 1.0 / ((x2 - x1) * 1.0));
     if x2 - x1 < 0 then angle := angle + pi;
     Form1.mapImage.Canvas.Pen.Color := clBlack;
     Form1.mapImage.Canvas.Pen.Width := 2;
-    drawArrow(x2 - (x2 - x1) div 2 + round((len + 6) * cos(angle) / 2),
-      y2 - (y2 - y1) div 2 + round((len + 6) * sin(angle) / 2), angle, len);
+    drawArrow(x2 - (x2 - x1) div 2 + round((len + 15) * cos(angle) / 2),
+      y2 - (y2 - y1) div 2 + round((len + 15) * sin(angle) / 2), angle, len);
     exit;
   end;
   with Form1.mapImage.Canvas do
@@ -399,8 +400,8 @@ end;
 procedure TForm1.BitBtn9Click(Sender: TObject);
 begin
   clear(mapGraph);
-  LoadMapFromFile('map\map.txt');
-  drawGraph;
+  LoadMapFromFile(OpenDialog1.FileName);
+  drawGraph;                               
 end;
 
 procedure TForm1.Label2Click(Sender: TObject);

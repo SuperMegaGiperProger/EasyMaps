@@ -5,7 +5,7 @@ unit MainUnit;
 interface
 
 uses
-  GraphUnit, DrawUnit, GeoUnit;
+  GraphUnit, DrawUnit, GeoUnit, Graphics;
 
 procedure main;
 
@@ -113,6 +113,10 @@ begin
   longitude0 := 27.584859;
   x0 := getXDecartCoordinates(longitude0) - 0.1;
   y0 := getYDecartCoordinates(latitude0) + 0.1;
+
+  pointPicture := TBitmap.Create;
+  pointPicture.LoadFromFile('Images\point.bmp');
+  pointPicture.Transparent := true;
 
 end;
 

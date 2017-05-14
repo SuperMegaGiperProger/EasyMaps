@@ -27,6 +27,7 @@ type
     BitBtn10: TBitBtn;
     SpeedButton1: TSpeedButton;
     SpeedButton2: TSpeedButton;
+    OpenDialog1: TOpenDialog;
     procedure BitBtn1Click(Sender: TObject);
     procedure mapImageMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
@@ -70,6 +71,7 @@ var
   longitude0: real =  27.58;
   x0, y0: real;
   way: TListOfPointers = nil;
+  pointPicture: TBitmap;
 
 procedure drawGraph;
   
@@ -104,16 +106,10 @@ begin
 end;
 
 procedure drawPoint(x, y, num: integer);
-var
-  pc: TBitmap;
 begin
   with Form1.mapImage.Canvas do
   begin
-    pc := TBitmap.Create;
-    pc.LoadFromFile('Images\point.bmp');
-    pc.Transparent := true;
-    Draw(x - pc.Width div 2, y - pc.Height, pc);
-    pc.Free;
+    Draw(x - pointPicture.Width div 2, y - pointPicture.Height, pointPicture);
     Font.Name := 'Arial';
     Font.Style := [fsBold];
     Brush.Style := bsClear;
@@ -398,9 +394,10 @@ end;
 
 procedure TForm1.BitBtn9Click(Sender: TObject);
 begin
+  if not openDialog1.Execute then exit;
   clear(mapGraph);
-  LoadMapFromFile('map\map.txt');
-  drawGraph;
+  LoadMapFromFile(OpenDialog1.FileName);
+  drawGraph;                               
 end;
 
 procedure TForm1.Label2Click(Sender: TObject);
