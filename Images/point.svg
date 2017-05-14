@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="119.84251"
+   height="196.53543"
+   viewBox="0 0 31.708339 52.000001"
+   version="1.1"
+   id="svg8"
+   inkscape:version="0.92.1 r"
+   sodipodi:docname="point.svg"
+   inkscape:export-filename="/mnt/4CC4F1C5C4F1B176/Projects/Delphi ОАиП 2/CourseWork_2sem/Images/point.png"
+   inkscape:export-xdpi="12.211538"
+   inkscape:export-ydpi="12.211538">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="2.8"
+     inkscape:cx="77.390654"
+     inkscape:cy="127.4477"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     units="px"
+     inkscape:window-width="1920"
+     inkscape:window-height="1016"
+     inkscape:window-x="0"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-244.99998)">
+    <path
+       style="fill:#1298ff;fill-opacity:1;stroke:#000000;stroke-width:0.45517609;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 26.261983,273.69465 c -11.265033,12.18463 -10.434668,22.98859 -10.434668,22.98859 0,0 1.008824,-10.80396 -10.2562095,-22.98859 -11.2650339,-12.18462 -3.2185817,-28.16258 10.3454395,-28.39247 13.56402,0.22989 21.610471,16.20785 10.345438,28.39247 z"
+       id="path4495-6"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="scscs"
+       inkscape:export-filename="/mnt/4CC4F1C5C4F1B176/Projects/Delphi ОАиП 2/CourseWork_2sem/Images/point.png"
+       inkscape:export-xdpi="14.700211"
+       inkscape:export-ydpi="14.700211" />
+  </g>
+</svg>
