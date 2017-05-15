@@ -1,5 +1,10 @@
 unit DrawUnit;
 
+
+// сделать старт и финиш других цветов
+// сделать настройку производительность / память
+
+
 //----------------------------------------------------------------------------//
 
 interface                   
@@ -7,13 +12,12 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, GraphUnit, ExtCtrls, listOfPointersUnit, StdCtrls, Buttons,
-  HashUnit, ShellAPI, GeoUnit, MapLoaderUnit, Math;
+  HashUnit, ShellAPI, GeoUnit, MapLoaderUnit, Math, ComCtrls;
 
 type
   TForm1 = class(TForm)
     mapImage: TImage;
     BitBtn1: TBitBtn;
-    Shape1: TShape;
     BitBtn2: TBitBtn;
     BitBtn3: TBitBtn;
     BitBtn4: TBitBtn;
@@ -28,6 +32,7 @@ type
     SpeedButton1: TSpeedButton;
     SpeedButton2: TSpeedButton;
     OpenDialog1: TOpenDialog;
+    ProgressBar1: TProgressBar;
     procedure BitBtn1Click(Sender: TObject);
     procedure mapImageMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
@@ -63,6 +68,7 @@ const
   STANDART_WIDTH = 0.0032;
   MAX_SCALE = 0.01;
   MIN_SCALE = 0.0005;
+  DRAWING_RADIUS =  0.100;  // km
 
 var
   Form1: TForm1;
@@ -71,6 +77,7 @@ var
   longitude0: real =  27.58;
   x0, y0: real;
   way: TListOfPointers = nil;
+  pointPicture: TBitmap;
 
 procedure drawGraph;
   
@@ -105,16 +112,10 @@ begin
 end;
 
 procedure drawPoint(x, y, num: integer);
-var
-  pc: TBitmap;
 begin
   with Form1.mapImage.Canvas do
   begin
-    pc := TBitmap.Create;
-    pc.LoadFromFile('Images\point.bmp');
-    pc.Transparent := true;
-    Draw(x - pc.Width div 2, y - pc.Height, pc);
-    pc.Free;
+    Draw(x - pointPicture.Width div 2, y - pointPicture.Height, pointPicture);
     Font.Name := 'Arial';
     Font.Style := [fsBold];
     Brush.Style := bsClear;
@@ -238,24 +239,46 @@ var
   movType: TMovingType = car;
   arr: array of TVertexPt;
 
+function min(a, b: integer): integer;
+begin
+  if a < b then result := a
+  else result := b;
+end;
+
+function max(a, b: integer): integer;
+begin
+  if a > b then result := a
+  else result := b;
+end;
+
 procedure drawGraph;
 var
   it: TEltPt;
   v: TVertex;
-  i: integer;
+  i, j: integer;
 begin
   Form1.mapImage.Picture.Graphic := nil;
   Form1.mapImage.Canvas.Brush.Color := clRed;
   Form1.mapImage.Canvas.Pen.Color := clRed;
-  for i := 0 to mapGraph.size - 1 do
+  with mapGraph do
   begin
-    it := mapGraph.table[i];
-    while it <> nil do
+    for i := max(hashFunc(y0 -
+      Form1.mapImage.Height / scale - minY - DRAWING_RADIUS, k), 0) to
+      min(mapGraph.hashFunc(y0 - minY + DRAWING_RADIUS, k), height - 1) do
     begin
-      v := TVertexPt(it^.data)^;
-      drawVertex(v);
-      drawAllRoads(v);
-      it := it^.next;
+      for j := max(hashFunc(x0 - minX - DRAWING_RADIUS, k), 0) to
+        min(hashFunc(x0 + Form1.mapImage.Width / scale - minX + DRAWING_RADIUS,
+          k), width - 1) do
+      begin
+        it := mapGraph.table[i][j];
+        while it <> nil do
+        begin
+          v := TVertexPt(it^.data)^;
+          drawVertex(v);
+          drawAllRoads(v);
+          it := it^.next;
+        end;
+      end;
     end;
   end;
   drawWay(way);
@@ -269,34 +292,44 @@ begin
   drawGraph;
 end;
 
-function findClosestVertex(X, Y: Integer): TVertexPt;
+function findClosestVertex(X, Y: real): TVertexPt;
+const
+  SEARCHING_RADIUS = 0.010;  // km
 var
+  d, i, j: integer;
   closestVert: TVertexPt;
   it: TEltPt;
-  v, mouseV: TVertex;
-  i: integer;
+  mouseV, v: TVertex;
 begin
   result := nil;
-  with mouseV do
+  y := -y * scale + y0;
+  x := x * scale + x0;
+  mouseV.latitude := getLatitude(y);
+  mouseV.longitude := getLongitude(x);
+  with mapGraph do
   begin
-    latitude := getLatitude(-y * scale + y0);
-    longitude := getLongitude(x * scale + x0);
-  end;
-  for i := 0 to mapGraph.size - 1 do
-  begin
-    it := mapGraph.table[i];
-    if it = nil then continue;
-    closestVert := TVertexPt(it^.data);
-    while it <> nil do
-    begin
-      v := TVertexPt(it^.data)^;
-      if psevdoDistation(v, mouseV) < psevdoDistation(closestVert^, mouseV) then
-        closestVert := it^.data;
-      it := it^.next;
-    end;
-    if result = nil then result := closestVert;
-    if psevdoDistation(closestVert^, mouseV) < psevdoDistation(result^, mouseV) then
-      result := closestVert;
+    d := round(SEARCHING_RADIUS * k);
+    i := hashFunc(y - minY, k);
+    j := hashFunc(x - minX, k);
+    if (i >= height) or (j >= width) then exit;
+    for i := max(i - d, 0) to min(i + d, height) do
+      for j := max(j - d, 0) to min(j + d, width) do
+      begin
+        it := mapGraph.table[i][j];
+        if it = nil then continue;
+        closestVert := TVertexPt(it^.data);
+        while it <> nil do
+        begin
+          v := TVertexPt(it^.data)^;
+          if Distation(@v, @mouseV) < Distation(closestVert, @mouseV) then
+            closestVert := it^.data;
+          it := it^.next;
+        end;
+        if result = nil then result := closestVert
+        else
+          if Distation(closestVert, @mouseV) < Distation(result, @mouseV) then
+            result := closestVert;
+      end;
   end;
 end;
 
@@ -399,7 +432,7 @@ end;
 
 procedure TForm1.BitBtn9Click(Sender: TObject);
 begin
-  clear(mapGraph);
+  if not openDialog1.Execute then exit;
   LoadMapFromFile(OpenDialog1.FileName);
   drawGraph;                               
 end;

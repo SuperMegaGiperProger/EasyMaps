@@ -25,14 +25,6 @@ object Form1: TForm1
     OnMouseMove = mapImageMouseMove
     OnMouseUp = mapImageMouseUp
   end
-  object Shape1: TShape
-    Left = 0
-    Top = 48
-    Width = 1
-    Height = 145
-    Brush.Style = bsCross
-    Pen.Style = psDot
-  end
   object Label1: TLabel
     Left = 448
     Top = 544
@@ -180,11 +172,18 @@ object Form1: TForm1
     Caption = 'BitBtn10'
     TabOrder = 9
   end
+  object ProgressBar1: TProgressBar
+    Left = 336
+    Top = 48
+    Width = 150
+    Height = 16
+    TabOrder = 10
+  end
   object OpenDialog1: TOpenDialog
     FileName = 
       'Z:\mnt\4CC4F1C5C4F1B176\Projects\Delphi '#1054#1040#1080#1055' 2\CourseWork_2sem\M' +
       'ap\map.txt'
-    Left = 40
-    Top = 16
+    Left = 32
+    Top = 24
   end
 end

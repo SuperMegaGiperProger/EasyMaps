@@ -1,5 +1,8 @@
 program EasyMaps;
 
+// push
+// get closest
+
 uses
   Forms,
   DrawUnit in 'Units\DrawUnit.pas' {Form1},
@@ -16,6 +19,5 @@ uses
 begin
   Application.Initialize;
   Application.CreateForm(TForm1, Form1);
-  main;
   Application.Run;
 end.

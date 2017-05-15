@@ -27,7 +27,7 @@ type
     endPoint: TVertexPt;
   end;
   TEdgePt = ^TEdge;
-  TGraphList = THashList;  // list of TVertex
+  TGraphList = THashMatrix;  // list of TVertex
 
 const
   INF = 1000000000;  // infinity way
@@ -35,9 +35,9 @@ var
   mapGraph: TGraphList;  // main map graph
 
 
-function createVertex(latitude, longitude: real; id: int64): TVertexPt;
-  // put vertex in mapGraph
-  // O(1)
+function createVertex(latitude, longitude: real; id: int64;
+  var list: THashList): TVertexPt;
+  // put vertex in list
 function createEdge(a, b: TVertexPt; weight: real; width: byte;
   movingTYpe: TMovingType; reversible: boolean = false): TEdgePt;  // O(1)
 function psevdoDistation(a, b: TVertex): real;  // "distation" in degrees
@@ -53,15 +53,16 @@ function getTheShortestWayThroughSeveralPoints(point: array of TVertexPt;
   // finishB = is point[size - 1] must be last on way
   // func return does way exist or not
   // O(n^2 * 2^n + n^2 * O(getTheShortestWay))  // memory O(n * 2^n)
-function correctVertex(elt: TEltPt; key: Variant): boolean;
+function correctVertexId(elt: TEltPt; key: array of Variant): boolean;
+//function
 
 //----------------------------------------------------------------------------//
 
 implementation
 
-function correctVertex(elt: TEltPt; key: Variant): boolean;
+function correctVertexId(elt: TEltPt; key: array of Variant): boolean;
 begin
-  result := (TVertexPt(elt^.data)^.id = key);
+  result := (TVertexPt(elt^.data)^.id = key[0]);
 end;
 
 type
@@ -220,22 +221,23 @@ end;
 procedure preparationForGettingTheShortestWay;
 var
   it: TEltPt;
-  i: integer;
+  i, j: integer;
 begin
-  for i := 0 to mapGraph.size - 1 do
-  begin
-    it := mapGraph.table[i];
-    while it <> nil do
+  for i := 0 to mapGraph.height - 1 do
+    for j := 0 to mapGraph.width - 1 do
     begin
-      with TVertexPt(it^.data)^ do
+      it := mapGraph.table[i][j];
+      while it <> nil do
       begin
-        parent := nil;
-        used := false;
-        distation := INF;
+        with TVertexPt(it^.data)^ do
+       begin
+          parent := nil;
+          used := false;
+          distation := INF;
+        end;
+        it := it^.next;
       end;
-      it := it^.next;
     end;
-  end;
 end;
 
 type
@@ -309,8 +311,8 @@ begin
   while itV^.parent <> nil do
   begin
     itV2 := itV^.parent^.edgesList;
-    while (itV2 <> nil) and (TEdgePt(itV2^.data)^.endPoint <> itV) and
-      not TEdgePt(itV2^.data)^.movingType in movingTypeSet do
+    while (itV2 <> nil) and ((TEdgePt(itV2^.data)^.endPoint <> itV) or
+      not (TEdgePt(itV2^.data)^.movingType in movingTypeSet)) do
       itV2 := itV2^.next;
     if (itV2 = nil) or (TEdgePt(itV2^.data)^.endPoint <> itV) then
     begin
@@ -354,7 +356,8 @@ begin
     result := (TVertexPt(a)^.latitude < TVertexPt(b)^.latitude);
 end;
 
-function createVertex(latitude, longitude: real; id: int64): TVertexPt;
+function createVertex(latitude, longitude: real; id: int64;
+  var list: THashList): TVertexPt;
 var
   newV: TVertexPt;
 begin
@@ -369,15 +372,10 @@ begin
     used := false;
     distation := INF;
   end;
-  push(mapGraph, newV^.id, newV);
+  push(list, newV^.id, newV);
   result := newV;
   //push(mapGraph, newV, compareVertices);
 end;
-
-//----------------------------------------------------------------------------//
-
-initialization
-  mapGraph := createHashList(standartHashFunc, 100);
 
 //----------------------------------------------------------------------------//
 

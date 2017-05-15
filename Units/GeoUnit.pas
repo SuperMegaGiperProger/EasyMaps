@@ -8,15 +8,15 @@ uses
   math, graphUnit;
 
 const
-  R = 6371;
+  R = 6371;  // km
 
 function radToDeg(rad: real): real;
 function degToRad(deg: real): real;
-function getLatitude(y: real): real;
-function getLongitude(x: real): real;
-function getXDecartCoordinates(longitude: real): real;
-function getYDecartCoordinates(latitude: real): real;
-function distation(v1, v2: TVertexPt): real;
+function getLatitude(y: real): real;  // deg
+function getLongitude(x: real): real;  // deg
+function getXDecartCoordinates(longitude: real): real;  // km
+function getYDecartCoordinates(latitude: real): real;   // km
+function distation(v1, v2: TVertexPt): real;  // km
 procedure maximize(var a: real; b: real);
 procedure minimize(var a: real; b: real);
 

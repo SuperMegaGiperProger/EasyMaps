@@ -5,16 +5,23 @@ unit MapLoaderUnit;
 interface
 
 uses
-  GraphUnit, Dialogs, HashUnit, SysUtils, GeoUnit;
+  GraphUnit, Dialogs, HashUnit, SysUtils, GeoUnit, ListOfPointersUnit;
 
 var
   topBorder, bottomBorder, leftBorder, rightBorder: real;  // in Decart coord
+  memorySize: integer = 10 * 1024 * 1024;  // to store graph
 
 function LoadMapFromFile(fileName: string): boolean;
 
 //----------------------------------------------------------------------------//
 
 implementation
+
+function min(a, b: real): real;
+begin
+  if a < b then result := a
+  else result := b;
+end;
 
 function movingType(str: string): TMovingType;
 begin
@@ -34,6 +41,11 @@ var
   width: byte;
   mov: TMovingType;
   maxLat, minLat, maxLon, minLon: real;
+  vertList: THashList;
+  k, h, w: real;
+  i: integer;
+  it: TEltPt;
+  v: TVertex;
 begin
   maxLat := -90;
   minLat := 90;
@@ -41,6 +53,8 @@ begin
   minLon := 180;
   result := true;
   try
+    clear(mapGraph);
+    vertList := createHashList(standartHashFunc);
     Assign(f, fileName);
     Reset(f);
     try
@@ -58,7 +72,7 @@ begin
         minimize(minLat, lat);
         maximize(maxLon, lon);
         minimize(minLon, lon);
-        createVertex(lat, lon, id);
+        createVertex(lat, lon, id, vertList);
       end;
       if eof(f) then showMessage('endoffile');
       repeat
@@ -68,7 +82,7 @@ begin
       # weight(lanes number)(if foot then weight = 1)
       # reversed(oneway=no)
       # links
-      # \n                                             }
+      # \n                                           }
       while not eof(f) do
       begin
         readln(f, str);
@@ -78,13 +92,13 @@ begin
         readln(f, str);
         rev := (str = 'True');
         readln(f, id);
-        v1 := TVertexPt(get(mapGraph, id, correctVertex)^.data);
+        v1 := TVertexPt(get(vertList, id, correctVertexId)^.data);
         while not eof(f) do
         begin
           readln(f, str);
           if str = '' then break;
           id := StrToInt64(str);
-          v2 := TVertexPt(get(mapGraph, id, correctVertex)^.data);
+          v2 := TVertexPt(get(vertList, id, correctVertexId)^.data);
           createEdge(v1, v2, distation(v1, v2), width, mov, rev);
           v1 := v2;
         end;
@@ -99,13 +113,34 @@ begin
     ShowMessage('Ошибка чтения файла');
     result := false;
   end;
+  //// creating hash matrix
   leftBorder := getXDecartCoordinates(minLon);
   rightBorder := getXDecartCoordinates(maxLon);
   bottomBorder := getYDecartCoordinates(minLat);
   topBorder := getYDecartCoordinates(maxLat);
+  h := topBorder - bottomBorder;  // height = max(cy) - min(cy)
+  w := rightBorder - leftBorder;  // width = max(cx) - min(cx)
+  k := trunc(sqrt((memorySize div SizeOf(TListOfPointers)) / (h * w)));
+    // k = trunc(mem / S)  // S = height * width  // k = 1 / cell capacity
+  w := w * k;
+  h := h * k;
+  mapGraph := CreateHashMatrix(trunc(h), trunc(w), trunc(k),
+    leftBorder, bottomBorder, matrixHashFunc);
+  //// filling in matrix
+  for i := 0 to vertList.size - 1 do
+  begin
+    it := vertList.table[i];
+    while it <> nil do
+    begin
+      v := TVertexPt(it^.data)^;
+      push(mapGraph, getYDecartCoordinates(v.latitude),
+        getXDecartCoordinates(v.longitude), it^.data);
+      it := it^.next;
+    end;
+  end;
+  clear(vertList);
 end;
 
 //----------------------------------------------------------------------------//
 
 end.
- 

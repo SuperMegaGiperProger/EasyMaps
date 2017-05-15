@@ -17,6 +17,8 @@ function getLongitude(x: real): real;
 function getXDecartCoordinates(longitude: real): real;
 function getYDecartCoordinates(latitude: real): real;
 function distation(v1, v2: TVertexPt): real;
+procedure maximize(var a: real; b: real);
+procedure minimize(var a: real; b: real);
 
 //----------------------------------------------------------------------------//
 
@@ -59,6 +61,16 @@ begin
   result := sin(v1^.latitude) * sin(v2^.latitude) +
     cos(v1^.latitude) * cos(v2^.latitude) * cos(v1^.longitude - v2^.longitude);
   result := R * arccos(result);
+end;
+ 
+procedure maximize(var a: real; b: real);
+begin
+  if a < b then a := b;
+end;
+
+procedure minimize(var a: real; b: real);
+begin
+  if a > b then a := b;
 end;
 
 //----------------------------------------------------------------------------//
