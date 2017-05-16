@@ -5,18 +5,14 @@ unit MapLoaderUnit;
 interface
 
 uses
-<<<<<<< HEAD
   GraphUnit, Dialogs, HashUnit, SysUtils, GeoUnit, ListOfPointersUnit;
 
-var
-  topBorder, bottomBorder, leftBorder, rightBorder: real;  // in Decart coord
-  memorySize: integer = 10 * 1024 * 1024;  // to store graph
-=======
-  GraphUnit, Dialogs, HashUnit, SysUtils, GeoUnit;
+const
+  MIN_CELL_CAPARCITY = 0.1;  // km
 
 var
   topBorder, bottomBorder, leftBorder, rightBorder: real;  // in Decart coord
->>>>>>> fa1c95540e2b76d3c547caac47e6865f92504510
+  memorySize: integer = 100 * 1024 * 1024;  // to store graph
 
 function LoadMapFromFile(fileName: string): boolean;
 
@@ -24,15 +20,12 @@ function LoadMapFromFile(fileName: string): boolean;
 
 implementation
 
-<<<<<<< HEAD
 function min(a, b: real): real;
 begin
   if a < b then result := a
   else result := b;
 end;
 
-=======
->>>>>>> fa1c95540e2b76d3c547caac47e6865f92504510
 function movingType(str: string): TMovingType;
 begin
   result := foot;
@@ -51,14 +44,14 @@ var
   width: byte;
   mov: TMovingType;
   maxLat, minLat, maxLon, minLon: real;
-<<<<<<< HEAD
   vertList: THashList;
   k, h, w: real;
   i: integer;
   it: TEltPt;
   v: TVertex;
-=======
->>>>>>> fa1c95540e2b76d3c547caac47e6865f92504510
+
+  filled: boolean;
+  cnt, j: integer;
 begin
   maxLat := -90;
   minLat := 90;
@@ -85,11 +78,7 @@ begin
         minimize(minLat, lat);
         maximize(maxLon, lon);
         minimize(minLon, lon);
-<<<<<<< HEAD
         createVertex(lat, lon, id, vertList);
-=======
-        createVertex(lat, lon, id);
->>>>>>> fa1c95540e2b76d3c547caac47e6865f92504510
       end;
       if eof(f) then showMessage('endoffile');
       repeat
@@ -99,11 +88,7 @@ begin
       # weight(lanes number)(if foot then weight = 1)
       # reversed(oneway=no)
       # links
-<<<<<<< HEAD
       # \n                                           }
-=======
-      # \n                                             }
->>>>>>> fa1c95540e2b76d3c547caac47e6865f92504510
       while not eof(f) do
       begin
         readln(f, str);
@@ -113,21 +98,13 @@ begin
         readln(f, str);
         rev := (str = 'True');
         readln(f, id);
-<<<<<<< HEAD
         v1 := TVertexPt(get(vertList, id, correctVertexId)^.data);
-=======
-        v1 := TVertexPt(get(mapGraph, id, correctVertex)^.data);
->>>>>>> fa1c95540e2b76d3c547caac47e6865f92504510
         while not eof(f) do
         begin
           readln(f, str);
           if str = '' then break;
           id := StrToInt64(str);
-<<<<<<< HEAD
           v2 := TVertexPt(get(vertList, id, correctVertexId)^.data);
-=======
-          v2 := TVertexPt(get(mapGraph, id, correctVertex)^.data);
->>>>>>> fa1c95540e2b76d3c547caac47e6865f92504510
           createEdge(v1, v2, distation(v1, v2), width, mov, rev);
           v1 := v2;
         end;
@@ -141,7 +118,6 @@ begin
   except
     ShowMessage('Ошибка чтения файла');
     result := false;
-<<<<<<< HEAD
   end;
   //// creating hash matrix
   leftBorder := getXDecartCoordinates(minLon);
@@ -152,6 +128,7 @@ begin
   w := rightBorder - leftBorder;  // width = max(cx) - min(cx)
   k := trunc(sqrt((memorySize div SizeOf(TListOfPointers)) / (h * w)));
     // k = trunc(mem / S)  // S = height * width  // k = 1 / cell capacity
+  minimize(k, 1 / MIN_CELL_CAPARCITY);
   w := w * k;
   h := h * k;
   mapGraph := CreateHashMatrix(trunc(h), trunc(w), trunc(k),
@@ -159,6 +136,7 @@ begin
   //// filling in matrix
   for i := 0 to vertList.size - 1 do
   begin
+    filled := false;
     it := vertList.table[i];
     while it <> nil do
     begin
@@ -169,13 +147,12 @@ begin
     end;
   end;
   clear(vertList);
-=======
-  end;
-  leftBorder := getXDecartCoordinates(minLon);
-  rightBorder := getXDecartCoordinates(maxLon);
-  bottomBorder := getYDecartCoordinates(minLat);
-  topBorder := getYDecartCoordinates(maxLat);
->>>>>>> fa1c95540e2b76d3c547caac47e6865f92504510
+
+  cnt := 0;
+  for i := 0 to mapGraph.height - 1 do
+    for j := 0 to mapGraph.width - 1 do
+      if mapGraph.table[i][j] <> nil then inc(cnt);
+  ShowMessage(FloatToStr(cnt * 100.0 / (mapGraph.height * mapGraph.width)) + ' %');
 end;
 
 //----------------------------------------------------------------------------//

@@ -7,9 +7,12 @@ interface
 uses
   GraphUnit, Dialogs, HashUnit, SysUtils, GeoUnit, ListOfPointersUnit;
 
+const
+  MIN_CELL_CAPARCITY = 0.01;  // km
+
 var
   topBorder, bottomBorder, leftBorder, rightBorder: real;  // in Decart coord
-  memorySize: integer = 10 * 1024 * 1024;  // to store graph
+  memorySize: integer = 100 * 1024 * 1024;  // to store graph
 
 function LoadMapFromFile(fileName: string): boolean;
 
@@ -46,6 +49,9 @@ var
   i: integer;
   it: TEltPt;
   v: TVertex;
+
+  filled: boolean;
+  cnt, j: integer;
 begin
   maxLat := -90;
   minLat := 90;
@@ -122,6 +128,7 @@ begin
   w := rightBorder - leftBorder;  // width = max(cx) - min(cx)
   k := trunc(sqrt((memorySize div SizeOf(TListOfPointers)) / (h * w)));
     // k = trunc(mem / S)  // S = height * width  // k = 1 / cell capacity
+  minimize(k, 1 / MIN_CELL_CAPARCITY);
   w := w * k;
   h := h * k;
   mapGraph := CreateHashMatrix(trunc(h), trunc(w), trunc(k),
@@ -129,6 +136,7 @@ begin
   //// filling in matrix
   for i := 0 to vertList.size - 1 do
   begin
+    filled := false;
     it := vertList.table[i];
     while it <> nil do
     begin
@@ -139,6 +147,12 @@ begin
     end;
   end;
   clear(vertList);
+
+  cnt := 0;
+  for i := 0 to mapGraph.height - 1 do
+    for j := 0 to mapGraph.width - 1 do
+      if mapGraph.table[i][j] <> nil then inc(cnt);
+  ShowMessage(FloatToStr(cnt * 100.0 / (mapGraph.height * mapGraph.width)) + ' %');
 end;
 
 //----------------------------------------------------------------------------//

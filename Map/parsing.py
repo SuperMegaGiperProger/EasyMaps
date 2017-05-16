@@ -1,27 +1,16 @@
 import xml.etree.ElementTree as etree
 
-<<<<<<< HEAD
 fname = input('Filename: ')
 
 tree = etree.parse(fname + '.osm')
-=======
-tree = etree.parse('map.osm')
->>>>>>> fa1c95540e2b76d3c547caac47e6865f92504510
 root = tree.getroot()
 
 vertices = set()
 edges = []
-<<<<<<< HEAD
 w = {'motorway' : '3', 'trunk' : '2', 'primary' : '2', 'secondary' : '2', 'tertiary' : '2', 'unclassified' : '1', 'residential' : '1', 'service' : '1', 'track' : '1'}
 
 for way in root.findall('way'):
     #if way.attrib['visible'] == 'false': continue
-=======
-w = {'motorway' : '3', 'trunk' : '2', 'primary' : '2', 'secondary' : '2', 'tertiary' : '2', ' 	unclassified' : '1', 'residential' : '1', 'service' : '1', 'track' : '1'}
-
-for way in root.findall('way'):
-    if way.attrib['visible'] == 'false': continue
->>>>>>> fa1c95540e2b76d3c547caac47e6865f92504510
     exist = False
     rever = False
     revch = False
@@ -39,15 +28,9 @@ for way in root.findall('way'):
         if k == 'sidewalk':
             if v != 'no': sidewalk = True
         if k == 'lanes':
-<<<<<<< HEAD
         	weight = v[0]
         	weich = True
         	continue
-=======
-            weight = v
-            weich = True
-            continue
->>>>>>> fa1c95540e2b76d3c547caac47e6865f92504510
         if k == 'highway':
             if v == 'road':
                 exist = False
@@ -92,11 +75,7 @@ for way in root.findall('way'):
         edges[-1][1] = '1'
         edges[-1][2] = True
 
-<<<<<<< HEAD
 f = open(fname + '.txt', 'w')
-=======
-f = open('map.txt', 'w')
->>>>>>> fa1c95540e2b76d3c547caac47e6865f92504510
 f.write('vertices\n')
 # id
 # lat

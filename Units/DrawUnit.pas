@@ -263,11 +263,11 @@ begin
   with mapGraph do
   begin
     for i := max(hashFunc(y0 -
-      Form1.mapImage.Height / scale - minY - DRAWING_RADIUS, k), 0) to
+      Form1.mapImage.Height * scale - minY - DRAWING_RADIUS, k), 0) to
       min(mapGraph.hashFunc(y0 - minY + DRAWING_RADIUS, k), height - 1) do
     begin
       for j := max(hashFunc(x0 - minX - DRAWING_RADIUS, k), 0) to
-        min(hashFunc(x0 + Form1.mapImage.Width / scale - minX + DRAWING_RADIUS,
+        min(hashFunc(x0 + Form1.mapImage.Width * scale - minX + DRAWING_RADIUS,
           k), width - 1) do
       begin
         it := mapGraph.table[i][j];
