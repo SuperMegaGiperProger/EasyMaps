@@ -5,7 +5,7 @@ unit GraphUnit;
 interface
 
 uses
-  listOfPointersUnit, Dialogs, BinHeapUnit, hashUnit, SysUtils;
+  listOfPointersUnit, Dialogs, BinHeapUnit, hashUnit, SysUtils, Math;
 
 type
   TVertexPt = ^TVertex;
@@ -33,6 +33,8 @@ const
   INF = 1000000000;  // infinity way
 var
   mapGraph: TGraphList;  // main map graph
+  vertexNum: Int64 = 0;
+  EdgeNum: Int64 = 0;
 
 
 function createVertex(latitude, longitude: real; id: int64;
@@ -58,6 +60,9 @@ function correctVertexId(elt: TEltPt; key: array of Variant): boolean;
 //----------------------------------------------------------------------------//
 
 implementation
+
+uses
+  DrawUnit;
 
 function correctVertexId(elt: TEltPt; key: array of Variant): boolean;
 begin
@@ -86,11 +91,17 @@ begin
   if result then a := b;
 end;
 
+procedure printProgress(part, full: int64);
+begin
+  Form1.Gauge.Progress := trunc(part * 100.0 / full);
+end;
+
 function getTheShortestWayThroughSeveralPoints(point: array of TVertexPt;
   out distation: real; out way: TListOfPointers; startB: boolean = false;
   finishB: boolean = false; movingTypeSet: TMovingTypeSet = [car, foot, plane]):
   boolean;
   // looks through all gamilton ways and chooses the shortest
+  // progress output isn't usefull, it is just to show to user, that process goes 
 var
   g: array of array of real;  // adjacency matrix
   used: array of array of boolean;  // is gamilton way was used
@@ -102,9 +113,12 @@ var
   n, i, i0, j, mask, mask00, start, finish: integer;  // n = point number
   lastStart: integer;  // last start point which func looks through
   fn: integer;  // "false" n  // fn = point number, which func looks throught
+  iterationNum: int64;  // sum of cycles iterations number
+  iterationCount: int64;
 begin
 try
   ////preparation
+  Form1.Gauge.Progress := 0;
   n := length(point);
   SetLength(g, n);
   SetLength(used, n);
@@ -122,6 +136,9 @@ try
     fn := n - 1;
     if finish - 1 < lastStart then lastStart := finish - 1;
   end else fn := n;
+  iterationNum := n * round(n * edgeNum * log2(vertexNum) + (1 shl n)) + (lastStart + 1) * fn * (1 shl fn) + fn;
+  iterationCount := 0;
+  printProgress(iterationCount, iterationNum);
   ////creating graph
   for i := 0 to n - 1 do
   begin
@@ -132,12 +149,16 @@ try
     SetLength(next[i], 1 shl n);
     for j := 0 to n - 1 do getTheShortestWay(point[i], point[j], g[i][j],
       wayPart[i][j], movingTypeSet);
+    inc(iterationCount, round(n * edgeNum * log2(vertexNum)));
+    printProgress(iterationCount, iterationNum);
     for mask := 0 to (1 shl n) - 1 do
     begin
       d[i][mask] := INF;
       used[i][mask] := false;
       next[i][mask] := -1;
     end;
+    inc(iterationCount, (1 shl n));
+    printProgress(iterationCount, iterationNum);
     if finishB then d[i][0] := g[i][finish]
     else d[i][0] := 0;
   end;
@@ -176,14 +197,12 @@ try
       distation := d[i0][mask00];
       start := i0;
     end;
+    inc(iterationCount, fn * (1 shl fn));
+    printProgress(iterationCount, iterationNum);
   end;
   clear(stack);
   result := (distation < INF);
-  if not result then
-  begin
-    ShowMessage('ѕуть не найден');
-    exit;
-  end;
+  if not result then exit; //print 100 %
   /////getting way
   way := nil;
   i := start;
@@ -208,6 +227,8 @@ try
     push_top(way, wayPart[i][next[i][mask]]);
     i := next[i][mask];
     dec(mask, 1 shl i);
+    inc(iterationCount);
+    printProgress(iterationCount, iterationNum);
   end;
   if finishB then push_top(way, wayPart[i][finish]);
 except
@@ -338,6 +359,7 @@ begin
   result := newE;
   if reversible then
     createEdge(b, a, weight, width, movingType);
+  inc(EdgeNum);
   //if movingType = car then createEdge(a, b, weight, foot, true);
 end;
 
@@ -367,6 +389,7 @@ begin
   end;
   push(list, newV^.id, newV);
   result := newV;
+  inc(vertexNum);
   //push(mapGraph, newV, compareVertices);
 end;
 

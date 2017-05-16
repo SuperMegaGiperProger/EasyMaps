@@ -4,14 +4,10 @@ unit MapLoaderUnit;
 
 interface
 
-uses
-  GraphUnit, Dialogs, HashUnit, SysUtils, GeoUnit, ListOfPointersUnit;
-
 const
-  MIN_CELL_CAPARCITY = 0.01;  // km
+  MIN_CELL_CAPARCITY = 0.01;  // km  // cell in hash matrix
 
 var
-  topBorder, bottomBorder, leftBorder, rightBorder: real;  // in Decart coord
   memorySize: integer = 100 * 1024 * 1024;  // to store graph
 
 function LoadMapFromFile(fileName: string): boolean;
@@ -19,6 +15,9 @@ function LoadMapFromFile(fileName: string): boolean;
 //----------------------------------------------------------------------------//
 
 implementation
+
+uses
+  GraphUnit, Dialogs, HashUnit, SysUtils, GeoUnit, ListOfPointersUnit, DrawUnit;
 
 function min(a, b: real): real;
 begin
@@ -31,6 +30,11 @@ begin
   result := foot;
   if str = 'car' then result := car
   else if str = 'plane' then result := plane;
+end;
+
+procedure printProgress(var f: textFile);
+begin
+  Form1.Gauge.Progress := trunc(FilePos(f) * 100.0 / FileSize(f));
 end;
 
 function LoadMapFromFile(fileName: string): boolean;
@@ -49,9 +53,8 @@ var
   i: integer;
   it: TEltPt;
   v: TVertex;
-
-  filled: boolean;
-  cnt, j: integer;
+  //filled: boolean;
+  //cnt, j: integer;
 begin
   maxLat := -90;
   minLat := 90;
@@ -66,6 +69,7 @@ begin
     try
       repeat
         readln(f, str);
+        printProgress(f);
       until str = 'vertices';
       while not eof(f) do
       begin
@@ -79,10 +83,12 @@ begin
         maximize(maxLon, lon);
         minimize(minLon, lon);
         createVertex(lat, lon, id, vertList);
+        printProgress(f);
       end;
-      if eof(f) then showMessage('endoffile');
+      //if eof(f) then showMessage('endoffile');
       repeat
         readln(f, str);
+        printProgress(f);
       until str = 'edges';
       {# movingType(car, foot, plane)
       # weight(lanes number)(if foot then weight = 1)
@@ -107,8 +113,10 @@ begin
           v2 := TVertexPt(get(vertList, id, correctVertexId)^.data);
           createEdge(v1, v2, distation(v1, v2), width, mov, rev);
           v1 := v2;
+          printProgress(f);
         end;
       end;
+      CloseFile(f);
     except
       ShowMessage('Некорректный файл');
       result := false;
@@ -136,7 +144,7 @@ begin
   //// filling in matrix
   for i := 0 to vertList.size - 1 do
   begin
-    filled := false;
+    //filled := false;
     it := vertList.table[i];
     while it <> nil do
     begin

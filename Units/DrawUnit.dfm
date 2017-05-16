@@ -1,6 +1,6 @@
 object Form1: TForm1
-  Left = 1202
-  Top = 304
+  Left = 1201
+  Top = 198
   Width = 679
   Height = 604
   AlphaBlendValue = 10
@@ -83,31 +83,30 @@ object Form1: TForm1
     ParentFont = False
     OnClick = SpeedButton2Click
   end
-  object BitBtn1: TBitBtn
+  object Gauge: TGauge
     Left = 120
-    Top = 16
-    Width = 75
-    Height = 25
-    Caption = 'BitBtn1'
-    TabOrder = 0
-    OnClick = BitBtn1Click
+    Top = 48
+    Width = 273
+    Height = 17
+    ForeColor = clGreen
+    Progress = 0
   end
   object BitBtn2: TBitBtn
-    Left = 272
-    Top = 16
+    Left = 88
+    Top = 8
     Width = 75
     Height = 25
     Caption = 'BitBtn2'
-    TabOrder = 1
+    TabOrder = 0
     OnClick = BitBtn2Click
   end
   object BitBtn3: TBitBtn
-    Left = 392
-    Top = 16
+    Left = 160
+    Top = 8
     Width = 75
     Height = 25
     Caption = 'BitBtn3'
-    TabOrder = 2
+    TabOrder = 1
     OnClick = BitBtn3Click
   end
   object BitBtn4: TBitBtn
@@ -116,7 +115,7 @@ object Form1: TForm1
     Width = 75
     Height = 25
     Caption = 'BitBtn4'
-    TabOrder = 3
+    TabOrder = 2
     OnClick = BitBtn4Click
   end
   object BitBtn5: TBitBtn
@@ -125,7 +124,7 @@ object Form1: TForm1
     Width = 75
     Height = 25
     Caption = 'BitBtn5'
-    TabOrder = 4
+    TabOrder = 3
     OnClick = BitBtn5Click
   end
   object BitBtn6: TBitBtn
@@ -134,7 +133,7 @@ object Form1: TForm1
     Width = 75
     Height = 25
     Caption = 'BitBtn6'
-    TabOrder = 5
+    TabOrder = 4
     OnClick = BitBtn6Click
   end
   object BitBtn7: TBitBtn
@@ -143,7 +142,7 @@ object Form1: TForm1
     Width = 75
     Height = 25
     Caption = 'BitBtn7'
-    TabOrder = 6
+    TabOrder = 5
     OnClick = BitBtn7Click
   end
   object BitBtn8: TBitBtn
@@ -152,16 +151,16 @@ object Form1: TForm1
     Width = 75
     Height = 25
     Caption = 'BitBtn8'
-    TabOrder = 7
+    TabOrder = 6
     OnClick = BitBtn8Click
   end
   object BitBtn9: TBitBtn
-    Left = 8
-    Top = 56
+    Left = 24
+    Top = 40
     Width = 75
     Height = 25
     Caption = 'Load'
-    TabOrder = 8
+    TabOrder = 7
     OnClick = BitBtn9Click
   end
   object BitBtn10: TBitBtn
@@ -170,20 +169,13 @@ object Form1: TForm1
     Width = 75
     Height = 25
     Caption = 'BitBtn10'
-    TabOrder = 9
-  end
-  object ProgressBar1: TProgressBar
-    Left = 336
-    Top = 48
-    Width = 150
-    Height = 16
-    TabOrder = 10
+    TabOrder = 8
   end
   object OpenDialog1: TOpenDialog
     FileName = 
       'Z:\mnt\4CC4F1C5C4F1B176\Projects\Delphi '#1054#1040#1080#1055' 2\CourseWork_2sem\M' +
       'ap\map.txt'
-    Left = 32
-    Top = 24
+    Left = 48
+    Top = 8
   end
 end

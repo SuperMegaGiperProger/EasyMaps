@@ -12,12 +12,11 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, GraphUnit, ExtCtrls, listOfPointersUnit, StdCtrls, Buttons,
-  HashUnit, ShellAPI, GeoUnit, MapLoaderUnit, Math, ComCtrls;
+  HashUnit, ShellAPI, GeoUnit, Math, ComCtrls, Gauges, MapLoaderUnit;
 
 type
   TForm1 = class(TForm)
     mapImage: TImage;
-    BitBtn1: TBitBtn;
     BitBtn2: TBitBtn;
     BitBtn3: TBitBtn;
     BitBtn4: TBitBtn;
@@ -32,7 +31,7 @@ type
     SpeedButton1: TSpeedButton;
     SpeedButton2: TSpeedButton;
     OpenDialog1: TOpenDialog;
-    ProgressBar1: TProgressBar;
+    Gauge: TGauge;
     procedure BitBtn1Click(Sender: TObject);
     procedure mapImageMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
@@ -78,6 +77,7 @@ var
   x0, y0: real;
   way: TListOfPointers = nil;
   pointPicture: TBitmap;
+  topBorder, bottomBorder, leftBorder, rightBorder: real;  // in Decart coord
 
 procedure drawFullGraph;
 procedure drawGraph(x1, y1, x2, y2: real; clear: boolean = true);
@@ -288,7 +288,7 @@ begin
         while it <> nil do
         begin
           v := TVertexPt(it^.data)^;
-          drawVertex(v);
+          //drawVertex(v);
           drawAllRoads(v);
           it := it^.next;
         end;
@@ -366,7 +366,12 @@ var
   exist: boolean;
 begin
   exist := getTheShortestWayThroughSeveralPoints(point, dist, way, start, finish, movingTypeSet);
-  if not exist then exit;
+  Form1.Gauge.Progress := 100;
+  if not exist then
+  begin
+    ShowMessage('ѕуть не найден');
+    exit;
+  end;
   drawFullgraph;
 end;
 
@@ -470,8 +475,7 @@ end;
 procedure TForm1.BitBtn9Click(Sender: TObject);
 begin
   if not openDialog1.Execute then exit;
-  LoadMapFromFile(OpenDialog1.FileName);
-  drawFullGraph;
+  if loadMapFromFile(OpenDialog1.FileName) then drawFullGraph;
 end;
 
 procedure TForm1.Label2Click(Sender: TObject);
@@ -532,6 +536,21 @@ begin
   if scale >= MAX_SCALE then exit;
   scale := scale + dScale;
   drawFullGraph;
+end;
+
+//----------------------------------------------------------------------------//
+
+initialization
+begin
+  scale := 1 / 400;
+  latitude0 := 53.920940;
+  longitude0 := 27.584859;
+  x0 := getXDecartCoordinates(longitude0) - 0.1;
+  y0 := getYDecartCoordinates(latitude0) + 0.1;
+
+  pointPicture := TBitmap.Create;
+  pointPicture.LoadFromFile('Images\point.bmp');
+  pointPicture.Transparent := true;
 end;
 
 //----------------------------------------------------------------------------//
