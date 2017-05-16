@@ -148,11 +148,11 @@ begin
   end;
   clear(vertList);
 
-  cnt := 0;
+  {cnt := 0;
   for i := 0 to mapGraph.height - 1 do
     for j := 0 to mapGraph.width - 1 do
       if mapGraph.table[i][j] <> nil then inc(cnt);
-  ShowMessage(FloatToStr(cnt * 100.0 / (mapGraph.height * mapGraph.width)) + ' %');
+  ShowMessage(FloatToStr(cnt * 100.0 / (mapGraph.height * mapGraph.width)) + ' %');}
 end;
 
 //----------------------------------------------------------------------------//

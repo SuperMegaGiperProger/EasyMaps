@@ -68,7 +68,7 @@ const
   STANDART_WIDTH = 0.0032;
   MAX_SCALE = 0.01;
   MIN_SCALE = 0.0005;
-  DRAWING_RADIUS =  0.100;  // km
+  DRAWING_RADIUS =  0.500;  // km
 
 var
   Form1: TForm1;
@@ -79,8 +79,9 @@ var
   way: TListOfPointers = nil;
   pointPicture: TBitmap;
 
-procedure drawGraph;
-  
+procedure drawFullGraph;
+procedure drawGraph(x1, y1, x2, y2: real; clear: boolean = true);
+
 //----------------------------------------------------------------------------//
 
 implementation
@@ -120,6 +121,21 @@ begin
     Font.Style := [fsBold];
     Brush.Style := bsClear;
     TextOut(x - length(IntToStr(num)) * 3 - 1, y - 26, IntToStr(num));
+  end;
+end;
+
+procedure clearPoint(x, y: integer);
+begin
+  with Form1.mapImage.Canvas do
+  begin
+    Pen.Style := psClear;
+    Brush.Color := clWhite;
+    Rectangle(x - pointPicture.Width div 2, y - pointPicture.Height,
+      x + (pointPicture.Width + 1) div 2 + 1, y);
+    Pen.Style := psSolid;
+    drawGraph(x0 + (x - pointPicture.Width div 2) * scale,
+      y0 - y * scale, x0 + (x + (pointPicture.Width + 1) div 2 + 1) * scale,
+      y0 - (y - pointPicture.Height) * scale, false);
   end;
 end;
 
@@ -251,24 +267,22 @@ begin
   else result := b;
 end;
 
-procedure drawGraph;
+procedure drawGraph(x1, y1, x2, y2: real; clear: boolean = true);
 var
   it: TEltPt;
   v: TVertex;
   i, j: integer;
 begin
-  Form1.mapImage.Picture.Graphic := nil;
+  if clear then Form1.mapImage.Picture.Graphic := nil;
   Form1.mapImage.Canvas.Brush.Color := clRed;
   Form1.mapImage.Canvas.Pen.Color := clRed;
   with mapGraph do
   begin
-    for i := max(hashFunc(y0 -
-      Form1.mapImage.Height * scale - minY - DRAWING_RADIUS, k), 0) to
-      min(mapGraph.hashFunc(y0 - minY + DRAWING_RADIUS, k), height - 1) do
+    for i := max(hashFunc(y1 - minY - DRAWING_RADIUS, k), 0) to
+      min(hashFunc(y2 - minY + DRAWING_RADIUS, k), height - 1) do
     begin
-      for j := max(hashFunc(x0 - minX - DRAWING_RADIUS, k), 0) to
-        min(hashFunc(x0 + Form1.mapImage.Width * scale - minX + DRAWING_RADIUS,
-          k), width - 1) do
+      for j := max(hashFunc(x1 - minX - DRAWING_RADIUS, k), 0) to
+        min(hashFunc(x2 - minX + DRAWING_RADIUS, k), width - 1) do
       begin
         it := mapGraph.table[i][j];
         while it <> nil do
@@ -286,15 +300,21 @@ begin
   drawPoints(arr);
 end;
 
+procedure drawFullGraph;
+begin
+  drawGraph(x0, y0 - Form1.mapImage.Height * scale,
+    x0 + Form1.mapImage.Width * scale, y0);
+end;
+
 procedure TForm1.BitBtn1Click(Sender: TObject);
 begin
   //scale := 1 / 150;
-  drawGraph;
+  drawFullGraph;
 end;
 
 function findClosestVertex(X, Y: real): TVertexPt;
 const
-  SEARCHING_RADIUS = 0.010;  // km
+  SEARCHING_RADIUS = 20;  // px
 var
   d, i, j: integer;
   closestVert: TVertexPt;
@@ -309,7 +329,7 @@ begin
   mouseV.longitude := getLongitude(x);
   with mapGraph do
   begin
-    d := round(SEARCHING_RADIUS * k);
+    d := round(SEARCHING_RADIUS * scale * k);
     i := hashFunc(y - minY, k);
     j := hashFunc(x - minX, k);
     if (i >= height) or (j >= width) then exit;
@@ -347,17 +367,29 @@ var
 begin
   exist := getTheShortestWayThroughSeveralPoints(point, dist, way, start, finish, movingTypeSet);
   if not exist then exit;
-  drawgraph;
+  drawFullgraph;
 end;
 
 var
   move, itWasMoving: boolean;
   xm, ym: integer;
 
+var
+  lastPointV: TVertexPt = nil;
+
 procedure TForm1.mapImageMouseMove(Sender: TObject; Shift: TShiftState; X,
   Y: Integer);
 begin
-  if not move then exit;
+  if not move then
+  begin
+    if lastPointV <> nil then clearPoint(getX(lastPointV^.longitude),
+      getY(lastPointV^.latitude));
+    lastPointV := findClosestVertex(x, y);
+    if lastPointV <> nil then
+      drawPoint(getX(lastPointV^.longitude), getY(lastPointV^.latitude),
+        length(arr) + 1);
+    exit;
+  end;
   with Form1.mapImage do
   begin
     //if not ((x0 > rightBorder - Width) or (x0 < leftBorder)) then
@@ -369,7 +401,7 @@ begin
     minimize(y0, topBorder);
     maximize(y0, bottomBorder + Height * scale);
   end;
-  drawGraph;
+  drawFullGraph;
   xm := x;
   ym := y;
   itWasMoving := true;
@@ -397,7 +429,7 @@ begin
   Form1.mapImage.Canvas.Pen.Color := clBlue;
   SetLength(arr, length(arr) + 1);
   arr[length(arr) - 1] := v;
-  drawPoint(x, y, length(arr));
+  //drawPoint(getX(v^.longitude), getY(v^.latitude), length(arr));
 end;
 
 procedure TForm1.BitBtn2Click(Sender: TObject);
@@ -439,7 +471,7 @@ procedure TForm1.BitBtn9Click(Sender: TObject);
 begin
   if not openDialog1.Execute then exit;
   LoadMapFromFile(OpenDialog1.FileName);
-  drawGraph;                               
+  drawFullGraph;
 end;
 
 procedure TForm1.Label2Click(Sender: TObject);
@@ -476,7 +508,7 @@ begin
   if scale >= MAX_SCALE then exit;
   if not onMap(MousePos) then exit;
   scale := scale + dScale;
-  drawGraph;
+  drawFullGraph;
 end;
 
 procedure TForm1.FormMouseWheelUp(Sender: TObject; Shift: TShiftState;
@@ -485,21 +517,21 @@ begin
   if scale <= MIN_SCALE then exit;
   if not onMap(MousePos) then exit;
   scale := scale - dScale;
-  drawGraph;
+  drawFullGraph;
 end;
 
 procedure TForm1.SpeedButton1Click(Sender: TObject);
 begin
   if scale <= MIN_SCALE then exit;
   scale := scale - dScale;
-  drawGraph;
+  drawFullGraph;
 end;
 
 procedure TForm1.SpeedButton2Click(Sender: TObject);
 begin       
   if scale >= MAX_SCALE then exit;
   scale := scale + dScale;
-  drawGraph;
+  drawFullGraph;
 end;
 
 //----------------------------------------------------------------------------//
