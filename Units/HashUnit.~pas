@@ -34,7 +34,8 @@ function get(hashList: THashList; key: Variant; correct: TCorrectFunc):
   TEltPt; overload;
 procedure push(hashList: THashList; key: Variant; data: Pointer); overload;
 procedure clear(hashList: THashList); overload;
-function createHashMatrix(height, width, k: integer;
+<<<<<<< HEAD
+function createHashMatrix(height, width, k: integer; minX, minY: real;
   hashFunc: THashFunc): THashMatrix;
 procedure clear(hashMatrix: THashMatrix); overload;
 function matrixHashFunc(key: variant; hashMatrixK: variant): integer;  // O(1)
@@ -42,19 +43,22 @@ procedure push(hashMatrix: THashMatrix; key1, key2: Variant;
   data: Pointer); overload;
 //function get(hashMatrix: THashMatrix; key1, key2: Variant;
   //correct: TCorrectFunc): TEltPt; overload;
+=======
+>>>>>>> fa1c95540e2b76d3c547caac47e6865f92504510
 
 //----------------------------------------------------------------------------//
 
 implementation
 
+<<<<<<< HEAD
 procedure push(hashMatrix: THashMatrix; key1, key2: Variant; data: Pointer);
 var
   i, j: integer;
 begin
   with hashMatrix do
   begin
-    i := HashFunc(key1, k);
-    j := HashFunc(key2, k);
+    i := HashFunc(key1 - minY, k);
+    j := HashFunc(key2 - minX, k);
     if (i >= height) or (j >= width) then exit;
     push_top(table[i][j], data);
   end;
@@ -111,6 +115,8 @@ begin
   end;
 end;
 
+=======
+>>>>>>> fa1c95540e2b76d3c547caac47e6865f92504510
 procedure clear(hashList: THashList);
 var
   i: integer;
@@ -118,8 +124,11 @@ begin
   with hashList do
   begin
     for i := 0 to size - 1 do clear(table[i]);
+<<<<<<< HEAD
     size := 1;
     SetLength(table, 1);
+=======
+>>>>>>> fa1c95540e2b76d3c547caac47e6865f92504510
   end;
 end;
 
@@ -149,12 +158,20 @@ begin
   result.hashFunc := hashFunc;
 end;
 
+<<<<<<< HEAD
 function standartHashFunc(key: variant; hashListSize: variant): integer;
+=======
+function standartHashFunc(key: variant; arg: variant): integer;
+>>>>>>> fa1c95540e2b76d3c547caac47e6865f92504510
 var
   k, s: int64;
 begin
   k := key;
+<<<<<<< HEAD
   s := hashListSize;
+=======
+  s := arg;
+>>>>>>> fa1c95540e2b76d3c547caac47e6865f92504510
   result := k mod s;
 end;
 

@@ -1,8 +1,5 @@
 program EasyMaps;
 
-// push
-// get closest
-
 uses
   Forms,
   DrawUnit in 'Units\DrawUnit.pas' {Form1},

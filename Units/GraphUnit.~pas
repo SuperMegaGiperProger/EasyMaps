@@ -35,12 +35,20 @@ var
   mapGraph: TGraphList;  // main map graph
 
 
+<<<<<<< HEAD
 function createVertex(latitude, longitude: real; id: int64;
   var list: THashList): TVertexPt;
   // put vertex in list
 function createEdge(a, b: TVertexPt; weight: real; width: byte;
   movingTYpe: TMovingType; reversible: boolean = false): TEdgePt;  // O(1)
+=======
+function createVertex(latitude, longitude: real; id: int64): TVertexPt;
+  // put vertex in mapGraph
+  // O(1)
+function createEdge(a, b: TVertexPt; weight: real; width: byte;
+  movingTYpe: TMovingType; reversible: boolean = false): TEdgePt;  // O(1)
 function psevdoDistation(a, b: TVertex): real;  // "distation" in degrees
+>>>>>>> fa1c95540e2b76d3c547caac47e6865f92504510
 function getTheShortestWay(s, f: TVertexPt; out distation: real;
   out way: TListOfPointers; movingTypeSet: TMovingTypeSet = [car, foot, plane]):
   boolean;
@@ -62,7 +70,11 @@ implementation
 
 function correctVertexId(elt: TEltPt; key: array of Variant): boolean;
 begin
+<<<<<<< HEAD
   result := (TVertexPt(elt^.data)^.id = key[0]);
+=======
+  result := (TVertexPt(elt^.data)^.id = key);
+>>>>>>> fa1c95540e2b76d3c547caac47e6865f92504510
 end;
 
 type
@@ -324,12 +336,15 @@ begin
   end;
 end;
 
+<<<<<<< HEAD
+=======
 function psevdoDistation(a, b: TVertex): real;
 begin
   result := sqrt((a.latitude - b.latitude) * (a.latitude - b.latitude) +
     (a.longitude - b.longitude) * (a.longitude - b.longitude));
 end;
 
+>>>>>>> fa1c95540e2b76d3c547caac47e6865f92504510
 function createEdge(a, b: TVertexPt; weight: real; width: byte;
   movingTYpe: TMovingType; reversible: boolean = false): TEdgePt;
 var
@@ -356,8 +371,12 @@ begin
     result := (TVertexPt(a)^.latitude < TVertexPt(b)^.latitude);
 end;
 
+<<<<<<< HEAD
 function createVertex(latitude, longitude: real; id: int64;
   var list: THashList): TVertexPt;
+=======
+function createVertex(latitude, longitude: real; id: int64): TVertexPt;
+>>>>>>> fa1c95540e2b76d3c547caac47e6865f92504510
 var
   newV: TVertexPt;
 begin
@@ -379,4 +398,12 @@ end;
 
 //----------------------------------------------------------------------------//
 
+<<<<<<< HEAD
+=======
+initialization
+  mapGraph := createHashList(standartHashFunc, 100);
+
+//----------------------------------------------------------------------------//
+
+>>>>>>> fa1c95540e2b76d3c547caac47e6865f92504510
 end.

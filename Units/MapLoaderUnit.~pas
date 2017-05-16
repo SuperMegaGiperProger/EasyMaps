@@ -5,11 +5,18 @@ unit MapLoaderUnit;
 interface
 
 uses
+<<<<<<< HEAD
   GraphUnit, Dialogs, HashUnit, SysUtils, GeoUnit, ListOfPointersUnit;
 
 var
   topBorder, bottomBorder, leftBorder, rightBorder: real;  // in Decart coord
   memorySize: integer = 10 * 1024 * 1024;  // to store graph
+=======
+  GraphUnit, Dialogs, HashUnit, SysUtils, GeoUnit;
+
+var
+  topBorder, bottomBorder, leftBorder, rightBorder: real;  // in Decart coord
+>>>>>>> fa1c95540e2b76d3c547caac47e6865f92504510
 
 function LoadMapFromFile(fileName: string): boolean;
 
@@ -17,12 +24,15 @@ function LoadMapFromFile(fileName: string): boolean;
 
 implementation
 
+<<<<<<< HEAD
 function min(a, b: real): real;
 begin
   if a < b then result := a
   else result := b;
 end;
 
+=======
+>>>>>>> fa1c95540e2b76d3c547caac47e6865f92504510
 function movingType(str: string): TMovingType;
 begin
   result := foot;
@@ -41,11 +51,14 @@ var
   width: byte;
   mov: TMovingType;
   maxLat, minLat, maxLon, minLon: real;
+<<<<<<< HEAD
   vertList: THashList;
   k, h, w: real;
   i: integer;
   it: TEltPt;
   v: TVertex;
+=======
+>>>>>>> fa1c95540e2b76d3c547caac47e6865f92504510
 begin
   maxLat := -90;
   minLat := 90;
@@ -72,7 +85,11 @@ begin
         minimize(minLat, lat);
         maximize(maxLon, lon);
         minimize(minLon, lon);
+<<<<<<< HEAD
         createVertex(lat, lon, id, vertList);
+=======
+        createVertex(lat, lon, id);
+>>>>>>> fa1c95540e2b76d3c547caac47e6865f92504510
       end;
       if eof(f) then showMessage('endoffile');
       repeat
@@ -82,7 +99,11 @@ begin
       # weight(lanes number)(if foot then weight = 1)
       # reversed(oneway=no)
       # links
+<<<<<<< HEAD
       # \n                                           }
+=======
+      # \n                                             }
+>>>>>>> fa1c95540e2b76d3c547caac47e6865f92504510
       while not eof(f) do
       begin
         readln(f, str);
@@ -92,13 +113,21 @@ begin
         readln(f, str);
         rev := (str = 'True');
         readln(f, id);
+<<<<<<< HEAD
         v1 := TVertexPt(get(vertList, id, correctVertexId)^.data);
+=======
+        v1 := TVertexPt(get(mapGraph, id, correctVertex)^.data);
+>>>>>>> fa1c95540e2b76d3c547caac47e6865f92504510
         while not eof(f) do
         begin
           readln(f, str);
           if str = '' then break;
           id := StrToInt64(str);
+<<<<<<< HEAD
           v2 := TVertexPt(get(vertList, id, correctVertexId)^.data);
+=======
+          v2 := TVertexPt(get(mapGraph, id, correctVertex)^.data);
+>>>>>>> fa1c95540e2b76d3c547caac47e6865f92504510
           createEdge(v1, v2, distation(v1, v2), width, mov, rev);
           v1 := v2;
         end;
@@ -112,6 +141,7 @@ begin
   except
     ShowMessage('Ошибка чтения файла');
     result := false;
+<<<<<<< HEAD
   end;
   //// creating hash matrix
   leftBorder := getXDecartCoordinates(minLon);
@@ -124,7 +154,7 @@ begin
     // k = trunc(mem / S)  // S = height * width  // k = 1 / cell capacity
   w := w * k;
   h := h * k;
-  mapGraph := CreateHashMatrix(trunc(h), trunc(w), trunc(k)
+  mapGraph := CreateHashMatrix(trunc(h), trunc(w), trunc(k),
     leftBorder, bottomBorder, matrixHashFunc);
   //// filling in matrix
   for i := 0 to vertList.size - 1 do
@@ -139,6 +169,13 @@ begin
     end;
   end;
   clear(vertList);
+=======
+  end;
+  leftBorder := getXDecartCoordinates(minLon);
+  rightBorder := getXDecartCoordinates(maxLon);
+  bottomBorder := getYDecartCoordinates(minLat);
+  topBorder := getYDecartCoordinates(maxLat);
+>>>>>>> fa1c95540e2b76d3c547caac47e6865f92504510
 end;
 
 //----------------------------------------------------------------------------//
