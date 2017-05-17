@@ -65,7 +65,7 @@ type
 const
   STANDART_RADIUS = 0.00005;
   STANDART_WIDTH = 0.0032;
-  MAX_SCALE = 0.01;
+  MAX_SCALE = 0.01758;
   MIN_SCALE = 0.0005;
   DRAWING_RADIUS =  0.500;  // km
 
@@ -131,7 +131,7 @@ begin
     Pen.Style := psClear;
     Brush.Color := clWhite;
     Rectangle(x - pointPicture.Width div 2, y - pointPicture.Height,
-      x + (pointPicture.Width + 1) div 2 + 1, y);
+      x + (pointPicture.Width + 1) div 2 + 1, y + 1);
     Pen.Style := psSolid;
     drawGraph(x0 + (x - pointPicture.Width div 2) * scale,
       y0 - y * scale, x0 + (x + (pointPicture.Width + 1) div 2 + 1) * scale,
@@ -503,15 +503,25 @@ begin
         (Y < top + mapImage.Top) or (Y > top + mapImage.Top + height));
 end;
 
+procedure ScaleChanging(MousePos: TPoint; d: ShortInt);  // d = -1, +1
 const
-  dScale = 0.0001;
+  scaleIncrease = 0.15;  // percents
+var
+  distX, distY: real;  // dist to x0, y0
+begin
+  distX := (MousePos.X - Form1.Left - Form1.mapImage.Left) * scale;
+  distY := (MousePos.Y - Form1.Top - Form1.mapImage.Top) * scale;
+  scale := scale * (1 + d * scaleIncrease);
+  x0 := x0 + (distX - (MousePos.X - Form1.Left - Form1.mapImage.Left) * scale);
+  y0 := y0 - (distY - (MousePos.Y - Form1.Top - Form1.mapImage.Top) * scale);
+end;
 
 procedure TForm1.FormMouseWheelDown(Sender: TObject; Shift: TShiftState;
   MousePos: TPoint; var Handled: Boolean);
 begin
   if scale >= MAX_SCALE then exit;
   if not onMap(MousePos) then exit;
-  scale := scale + dScale;
+  ScaleChanging(MousePos, +1);
   drawFullGraph;
 end;
 
@@ -520,9 +530,12 @@ procedure TForm1.FormMouseWheelUp(Sender: TObject; Shift: TShiftState;
 begin
   if scale <= MIN_SCALE then exit;
   if not onMap(MousePos) then exit;
-  scale := scale - dScale;
+  ScaleChanging(MousePos, -1);
   drawFullGraph;
 end;
+
+const
+  dScale = 0.0001;
 
 procedure TForm1.SpeedButton1Click(Sender: TObject);
 begin
@@ -542,7 +555,7 @@ end;
 
 initialization
 begin
-  scale := 1 / 400;
+  scale := 0.0058576146516;
   latitude0 := 53.920940;
   longitude0 := 27.584859;
   x0 := getXDecartCoordinates(longitude0) - 0.1;
