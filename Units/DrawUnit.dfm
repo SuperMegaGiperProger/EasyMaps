@@ -1,10 +1,13 @@
 object Form1: TForm1
-  Left = 1201
-  Top = 198
-  Width = 679
-  Height = 604
+  Left = 359
+  Top = 41
+  HorzScrollBar.Visible = False
+  VertScrollBar.Visible = False
   AlphaBlendValue = 10
+  AutoScroll = False
   Caption = 'EasyMaps'
+  ClientHeight = 993
+  ClientWidth = 1433
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -12,22 +15,23 @@ object Form1: TForm1
   Font.Name = 'MS Sans Serif'
   Font.Style = []
   OldCreateOrder = False
+  OnCanResize = FormCanResize
   OnMouseWheelDown = FormMouseWheelDown
   OnMouseWheelUp = FormMouseWheelUp
   PixelsPerInch = 96
   TextHeight = 13
   object mapImage: TImage
-    Left = 104
-    Top = 72
-    Width = 545
-    Height = 489
+    Left = 0
+    Top = 0
+    Width = 1433
+    Height = 993
     OnMouseDown = mapImageMouseDown
     OnMouseMove = mapImageMouseMove
     OnMouseUp = mapImageMouseUp
   end
   object Label1: TLabel
-    Left = 448
-    Top = 544
+    Left = 1232
+    Top = 976
     Width = 201
     Height = 17
     AutoSize = False
@@ -37,8 +41,8 @@ object Form1: TForm1
     Transparent = False
   end
   object Label2: TLabel
-    Left = 552
-    Top = 544
+    Left = 1336
+    Top = 976
     Width = 93
     Height = 13
     Caption = 'OpenStreetMap.org'
@@ -56,8 +60,8 @@ object Form1: TForm1
     OnMouseLeave = Label2MouseLeave
   end
   object SpeedButton1: TSpeedButton
-    Left = 616
-    Top = 448
+    Left = 1400
+    Top = 880
     Width = 23
     Height = 22
     Caption = '+'
@@ -70,8 +74,8 @@ object Form1: TForm1
     OnClick = SpeedButton1Click
   end
   object SpeedButton2: TSpeedButton
-    Left = 616
-    Top = 472
+    Left = 1400
+    Top = 904
     Width = 23
     Height = 22
     Caption = '-'

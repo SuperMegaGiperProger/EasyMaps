@@ -1,10 +1,5 @@
 unit DrawUnit;
 
-
-// сделать старт и финиш других цветов
-// сделать настройку производительность / память
-
-
 //----------------------------------------------------------------------------//
 
 interface                   
@@ -56,6 +51,8 @@ type
       MousePos: TPoint; var Handled: Boolean);
     procedure SpeedButton1Click(Sender: TObject);
     procedure SpeedButton2Click(Sender: TObject);
+    procedure FormCanResize(Sender: TObject; var NewWidth,
+      NewHeight: Integer; var Resize: Boolean);
   private
     { Private declarations }
   public
@@ -98,20 +95,6 @@ begin
   result := round((y0 - getYDecartCoordinates(latitude)) / scale);
 end;
 
-procedure drawVertex(v: TVertex; w: real = STANDART_RADIUS);
-var
-  x, y, r: integer;
-begin
-  with v do
-  begin
-    x := getX(longitude);
-    y := getY(latitude);
-    r := round(w / (2 * scale));
-  end;
-  Form1.mapImage.Canvas.Pen.Width := 0;
-  Form1.mapImage.Canvas.Ellipse(x - r, y - r, x + r, y + r);
-end;
-
 procedure drawPoint(x, y, num: integer);
 begin
   with Form1.mapImage.Canvas do
@@ -145,17 +128,22 @@ var
 begin
   with Form1.mapImage.Canvas do
   begin
-    moveTo(x, y);
-    lineTo(x - round(length * cos(angle)), y - round(length * sin(angle)));
+    {moveTo(x, y);
+    lineTo(x - round(length * cos(angle)), y - round(length * sin(angle)));}
     stx := x - round(length * cos(angle) / 1.2);
     sty := y - round(length * sin(angle) / 1.2);
     angle := angle + pi / 2;
-    moveTo(x, y);
+    {moveTo(x, y);
     lineTo(stx - round(length * cos(angle) / 2),
       sty - round(length * sin(angle) / 4));
     moveTo(x, y);
     lineTo(stx + round(length * cos(angle) / 2),
-      sty + round(length * sin(angle) / 4));
+      sty + round(length * sin(angle) / 4));}
+    Brush.Color := Pen.Color;
+    Polygon([Point(x, y), Point(stx - round(length * cos(angle) / 3),
+      sty - round(length * sin(angle) / 3)),
+      Point(stx + round(length * cos(angle) / 3),
+      sty + round(length * sin(angle) / 3))]);
   end;
 end;
 
@@ -384,6 +372,8 @@ var
 
 procedure TForm1.mapImageMouseMove(Sender: TObject; Shift: TShiftState; X,
   Y: Integer);
+var
+  prevX0, prevY0: real;
 begin
   if not move then
   begin
@@ -395,6 +385,8 @@ begin
         length(arr) + 1);
     exit;
   end;
+  prevX0 := x0;
+  prevY0 := y0;
   with Form1.mapImage do
   begin
     //if not ((x0 > rightBorder - Width) or (x0 < leftBorder)) then
@@ -406,7 +398,51 @@ begin
     minimize(y0, topBorder);
     maximize(y0, bottomBorder + Height * scale);
   end;
-  drawFullGraph;
+  //drawFullGraph;
+  with Form1.mapImage do
+  begin
+    Canvas.CopyRect(Rect(round((prevX0 - x0) / scale), 0 - round((prevY0 - y0) / scale),
+      Width + round((prevX0 - x0) / scale),
+      Height - round((prevY0 - y0) / scale)), Canvas, Rect(0, 0, Width, Height));
+    if x - xm > 0 then  // ->
+    begin
+      Canvas.Brush.Color := clWhite;
+      Canvas.Pen.Style := psClear;
+      Canvas.Rectangle(0, 0, x - xm + 1, Height);
+      Canvas.Brush.Color := clRed;
+      Canvas.Pen.Style := psSolid;
+      drawGraph(x0, y0 - Height * scale, x0 + (x - xm) * scale, y0, false);
+    end
+    else  // <-
+    begin
+      Canvas.Brush.Color := clWhite;
+      Canvas.Pen.Style := psClear;
+      Canvas.Rectangle(width + x - xm - 1, 0, width, Height);
+      Canvas.Brush.Color := clRed;
+      Canvas.Pen.Style := psSolid;
+      drawGraph(x0 + (width + x - xm) * scale, y0 - Height * scale,
+        x0 + width * scale, y0, false);
+    end;
+    if y - ym > 0 then  // \/
+    begin
+      Canvas.Brush.Color := clWhite;
+      Canvas.Pen.Style := psClear;
+      Canvas.Rectangle(0, 0, width, y - ym + 1);
+      Canvas.Brush.Color := clRed;
+      Canvas.Pen.Style := psSolid;
+      drawGraph(x0, y0 - (y - ym) * scale, x0 + width * scale, y0, false);
+    end
+    else  // ^
+    begin
+      Canvas.Brush.Color := clWhite;
+      Canvas.Pen.Style := psClear;
+      Canvas.Rectangle(0, height + y - ym - 1, width, Height);
+      Canvas.Brush.Color := clRed;
+      Canvas.Pen.Style := psSolid;
+      drawGraph(x0, y0 - Height * scale, x0 + width * scale,
+        y0 - (Height + y - ym) * scale, false);
+    end;
+  end;
   xm := x;
   ym := y;
   itWasMoving := true;
@@ -553,6 +589,12 @@ end;
 
 //----------------------------------------------------------------------------//
 
+procedure TForm1.FormCanResize(Sender: TObject; var NewWidth,
+  NewHeight: Integer; var Resize: Boolean);
+begin
+  mapImage.Height := NewHeight - mapImage.Top - 10;
+end;
+
 initialization
 begin
   scale := 0.0058576146516;
@@ -564,6 +606,10 @@ begin
   pointPicture := TBitmap.Create;
   pointPicture.LoadFromFile('Images\point.bmp');
   pointPicture.Transparent := true;
+
+  mapGraph.hashFunc := matrixHashFunc;
+  mapGraph.height := 0;
+  mapGraph.width := 0;
 end;
 
 //----------------------------------------------------------------------------//

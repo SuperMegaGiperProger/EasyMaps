@@ -5,7 +5,7 @@ unit MapLoaderUnit;
 interface
 
 const
-  MIN_CELL_CAPARCITY = 0.01;  // km  // cell in hash matrix
+  MIN_CELL_CAPARCITY = 0.1;  // km  // cell in hash matrix
 
 var
   memorySize: integer = 100 * 1024 * 1024;  // to store graph
@@ -53,8 +53,7 @@ var
   i: integer;
   it: TEltPt;
   v: TVertex;
-  //filled: boolean;
-  //cnt, j: integer;
+  cnt, j: integer;
 begin
   maxLat := -90;
   minLat := 90;
@@ -144,7 +143,6 @@ begin
   //// filling in matrix
   for i := 0 to vertList.size - 1 do
   begin
-    //filled := false;
     it := vertList.table[i];
     while it <> nil do
     begin
@@ -156,11 +154,11 @@ begin
   end;
   clear(vertList);
 
-  {cnt := 0;
+  cnt := 0;
   for i := 0 to mapGraph.height - 1 do
     for j := 0 to mapGraph.width - 1 do
       if mapGraph.table[i][j] <> nil then inc(cnt);
-  ShowMessage(FloatToStr(cnt * 100.0 / (mapGraph.height * mapGraph.width)) + ' %');}
+  ShowMessage(FloatToStr(cnt * 100.0 / (mapGraph.height * mapGraph.width)) + ' %');
 end;
 
 //----------------------------------------------------------------------------//

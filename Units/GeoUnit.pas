@@ -17,8 +17,8 @@ function getLongitude(x: real): real;  // deg
 function getXDecartCoordinates(longitude: real): real;  // km
 function getYDecartCoordinates(latitude: real): real;   // km
 function distation(v1, v2: TVertexPt): real;  // km
-procedure maximize(var a: real; b: real);
-procedure minimize(var a: real; b: real);
+function maximize(var a: real; b: real): boolean;
+function minimize(var a: real; b: real): boolean;
 
 //----------------------------------------------------------------------------//
 
@@ -63,14 +63,18 @@ begin
   result := R * arccos(result);
 end;
  
-procedure maximize(var a: real; b: real);
+function maximize(var a: real; b: real): boolean;
 begin
-  if a < b then a := b;
+  result := true;
+  if a < b then a := b
+  else result := false;
 end;
 
-procedure minimize(var a: real; b: real);
+function minimize(var a: real; b: real): boolean;
 begin
-  if a > b then a := b;
+  result := true;
+  if a > b then a := b
+  else result := false;
 end;
 
 //----------------------------------------------------------------------------//
