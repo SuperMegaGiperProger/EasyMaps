@@ -53,8 +53,11 @@ var
   i: integer;
   it: TEltPt;
   v: TVertex;
-  cnt, j: integer;
+  //cnt, j: integer;
 begin
+  Form1.Gauge.Progress := 0;
+  Form1.Gauge.Visible := true;
+  Form1.Label3.Visible := true;
   maxLat := -90;
   minLat := 90;
   maxLon := -180;
@@ -127,6 +130,7 @@ begin
     result := false;
   end;
   //// creating hash matrix
+  Form1.Gauge.Progress := 0;
   leftBorder := getXDecartCoordinates(minLon);
   rightBorder := getXDecartCoordinates(maxLon);
   bottomBorder := getYDecartCoordinates(minLat);
@@ -151,14 +155,15 @@ begin
         getXDecartCoordinates(v.longitude), it^.data);
       it := it^.next;
     end;
+    Form1.Gauge.Progress := trunc((i + 1) * 100.0 / vertList.size);
   end;
   clear(vertList);
-
-  cnt := 0;
+  Form1.Gauge.Visible := false;
+  {cnt := 0;
   for i := 0 to mapGraph.height - 1 do
     for j := 0 to mapGraph.width - 1 do
       if mapGraph.table[i][j] <> nil then inc(cnt);
-  ShowMessage(FloatToStr(cnt * 100.0 / (mapGraph.height * mapGraph.width)) + ' %');
+  ShowMessage(FloatToStr(cnt * 100.0 / (mapGraph.height * mapGraph.width)) + ' %');}
 end;
 
 //----------------------------------------------------------------------------//

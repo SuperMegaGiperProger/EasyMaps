@@ -7,37 +7,32 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, GraphUnit, ExtCtrls, listOfPointersUnit, StdCtrls, Buttons,
-  HashUnit, ShellAPI, GeoUnit, Math, ComCtrls, Gauges, MapLoaderUnit;
+  HashUnit, ShellAPI, GeoUnit, Math, ComCtrls, Gauges, MapLoaderUnit, Tabs;
 
 type
   TForm1 = class(TForm)
     mapImage: TImage;
-    BitBtn2: TBitBtn;
-    BitBtn3: TBitBtn;
     BitBtn4: TBitBtn;
-    BitBtn5: TBitBtn;
-    BitBtn6: TBitBtn;
-    BitBtn7: TBitBtn;
-    BitBtn8: TBitBtn;
-    BitBtn9: TBitBtn;
     Label1: TLabel;
     Label2: TLabel;
-    BitBtn10: TBitBtn;
     SpeedButton1: TSpeedButton;
     SpeedButton2: TSpeedButton;
-    OpenDialog1: TOpenDialog;
     Gauge: TGauge;
-    procedure BitBtn1Click(Sender: TObject);
+    LoadBtn: TBitBtn;
+    GroupBox1: TGroupBox;
+    CheckBoxStart: TCheckBox;
+    CheckBoxFinish: TCheckBox;
+    BitBtn2: TBitBtn;
+    GroupBox2: TGroupBox;
+    CheckBoxCar: TCheckBox;
+    CheckBoxFoot: TCheckBox;
+    Label3: TLabel;
+    ComboBoxCity: TComboBox;
+    procedure LoadBtnClick(Sender: TObject);
     procedure mapImageMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
     procedure BitBtn2Click(Sender: TObject);
-    procedure BitBtn3Click(Sender: TObject);
     procedure BitBtn4Click(Sender: TObject);
-    procedure BitBtn5Click(Sender: TObject);
-    procedure BitBtn6Click(Sender: TObject);
-    procedure BitBtn7Click(Sender: TObject);
-    procedure BitBtn8Click(Sender: TObject);
-    procedure BitBtn9Click(Sender: TObject);
     procedure Label2Click(Sender: TObject);
     procedure Label2MouseEnter(Sender: TObject);
     procedure Label2MouseLeave(Sender: TObject);
@@ -53,6 +48,7 @@ type
     procedure SpeedButton2Click(Sender: TObject);
     procedure FormCanResize(Sender: TObject; var NewWidth,
       NewHeight: Integer; var Resize: Boolean);
+    procedure FormActivate(Sender: TObject);
   private
     { Private declarations }
   public
@@ -78,6 +74,7 @@ var
 
 procedure drawFullGraph;
 procedure drawGraph(x1, y1, x2, y2: real; clear: boolean = true);
+procedure setComponentsVisible(v: boolean = true);
 
 //----------------------------------------------------------------------------//
 
@@ -294,10 +291,34 @@ begin
     x0 + Form1.mapImage.Width * scale, y0);
 end;
 
-procedure TForm1.BitBtn1Click(Sender: TObject);
+procedure TForm1.LoadBtnClick(Sender: TObject);
+var
+  filename: string;
 begin
-  //scale := 1 / 150;
-  drawFullGraph;
+  case ComboBoxCity.ItemIndex of
+    2: filename := 'minsk';
+    5: filename := 'glasgow_scotland';
+    4: filename := 'kyiv_ukraine';
+    3: filename := 'las-vegas_nevada';
+    1: filename := 'riga_latvia';
+    0: filename := 'singapore';
+    else
+      begin
+        ShowMessage('Выберите город');
+        exit;
+      end;
+  end;
+  LoadBtn.Visible := false;
+  Form1.Label3.Visible := true;
+  ComboBoxCity.Visible := false;
+  Form1.Repaint;
+  LoadMapFromFile('Map\' + filename + '.txt');
+  DrawFullGraph;
+  setComponentsVisible;
+  LoadBtn.Visible := false;
+  MapImage.Visible := true;
+  Label3.Visible := False;
+  ComboBoxCity.Visible := false;
 end;
 
 function findClosestVertex(X, Y: real): TVertexPt;
@@ -353,8 +374,9 @@ var
   dist: real;
   exist: boolean;
 begin
+  Form1.Gauge.Visible := true;
   exist := getTheShortestWayThroughSeveralPoints(point, dist, way, start, finish, movingTypeSet);
-  Form1.Gauge.Progress := 100;
+  Form1.Gauge.Visible := false;
   if not exist then
   begin
     ShowMessage('Путь не найден');
@@ -470,48 +492,24 @@ begin
   Form1.mapImage.Canvas.Pen.Color := clBlue;
   SetLength(arr, length(arr) + 1);
   arr[length(arr) - 1] := v;
-  //drawPoint(getX(v^.longitude), getY(v^.latitude), length(arr));
 end;
 
 procedure TForm1.BitBtn2Click(Sender: TObject);
+var
+  movSet: TMovingTypeSet;
 begin
-  movType := car;
-end;
-
-procedure TForm1.BitBtn3Click(Sender: TObject);
-begin
-  movType := foot;
+  movSet := [];
+  if CheckBoxFoot.Checked then Include(movSet, foot);
+  if CheckBoxCar.Checked then Include(movSet, car);
+  drawTheShortestWayTroughSeveralPoints(arr, CheckBoxStart.Checked,
+    CheckBoxFinish.Checked, movSet);
 end;
 
 procedure TForm1.BitBtn4Click(Sender: TObject);
 begin
   SetLength(arr, 0);
-end;
-
-procedure TForm1.BitBtn5Click(Sender: TObject);
-begin
-  drawTheShortestWayTroughSeveralPoints(arr, false, false, [movType]);
-end;
-
-procedure TForm1.BitBtn6Click(Sender: TObject);
-begin
-  drawTheShortestWayTroughSeveralPoints(arr, true, false, [movType]);
-end;
-
-procedure TForm1.BitBtn7Click(Sender: TObject);
-begin
-  drawTheShortestWayTroughSeveralPoints(arr, false, true, [movType]);
-end;
-
-procedure TForm1.BitBtn8Click(Sender: TObject);
-begin
-  drawTheShortestWayTroughSeveralPoints(arr, true, true, [movType]);
-end;
-
-procedure TForm1.BitBtn9Click(Sender: TObject);
-begin
-  if not openDialog1.Execute then exit;
-  if loadMapFromFile(OpenDialog1.FileName) then drawFullGraph;
+  way := nil;
+  DrawFullGraph;
 end;
 
 procedure TForm1.Label2Click(Sender: TObject);
@@ -587,13 +585,84 @@ begin
   drawFullGraph;
 end;
 
-//----------------------------------------------------------------------------//
-
 procedure TForm1.FormCanResize(Sender: TObject; var NewWidth,
   NewHeight: Integer; var Resize: Boolean);
+var
+  x, xm, y, ym: integer;
 begin
-  mapImage.Height := NewHeight - mapImage.Top - 10;
+  xm := mapImage.Width;    //                                     /\
+  x := NewWidth;           //  copying from mousemove procedure   |
+  ym := mapImage.Height;   //
+  y := NewHeight;          //
+  mapImage.Height := NewHeight;
+  mapImage.Width := NewWidth;
+  mapImage.Picture.Bitmap.Height := NewHeight;
+  mapImage.Picture.Bitmap.Width := Width;
+  with Form1.mapImage do
+  begin
+    if x - xm > 0 then  // ->
+    begin
+      Canvas.Brush.Color := clWhite;
+      Canvas.Pen.Style := psClear;
+      Canvas.Rectangle(xm - 1, 0, width, Height);
+      Canvas.Brush.Color := clRed;
+      Canvas.Pen.Style := psSolid;
+      drawGraph(x0 + xm * scale, y0 - Height * scale,
+        x0 + width * scale, y0, false);
+    end;
+    if y - ym > 0 then  // \/
+    begin
+      Canvas.Brush.Color := clWhite;
+      Canvas.Pen.Style := psClear;
+      Canvas.Rectangle(0, ym - 1, width, Height);
+      Canvas.Brush.Color := clRed;
+      Canvas.Pen.Style := psSolid;
+      drawGraph(x0, y0 - Height * scale, x0 + width * scale,
+        y0 - ym * scale, false);
+    end;
+  end;
+  Label1.Left := NewWidth - Label1.Width - 8;  // right
+  Label1.Top := NewHeight - Label1.Height - 26;  // bottom
+  Label2.Left := NewWidth - Label2.Width - 13;  // right
+  Label2.Top := Label1.Top;  // bottom
+  Gauge.Width := round(NewWidth * 0.8);
+  Gauge.Left := (NewWidth - Gauge.Width) div 2;  // center
+  Gauge.Top := (NewHeight - Gauge.Height) div 2;  // center
+  SpeedButton1.Left := NewWidth - 60;
+  SpeedButton1.Top := NewHeight - 140;
+  SpeedButton2.Left := NewWidth - 60;
+  SpeedButton2.Top := NewHeight - 140 + SpeedButton1.Height;
 end;
+
+procedure TForm1.FormActivate(Sender: TObject);
+begin
+  setComponentsVisible(false);
+  LoadBtn.Visible := true;
+  MapImage.Visible := false;
+  ComboBoxCity.Visible := true;
+end;
+
+procedure setComponentsVisible(v: boolean = true);
+var
+  i: integer;
+begin
+  with Form1 do
+    for i := 0 to ComponentCount - 1 do
+    begin
+      if Components[i] is TBitBtn then
+        (Components[i] as TBitBtn).Visible := v;
+      if Components[i] is TSpeedButton then
+        (Components[i] as TSpeedButton).Visible := v;
+      if Components[i] is TLabel then
+        (Components[i] as TLabel).Visible := v;
+      if Components[i] is TGroupBox then
+        (Components[i] as TGroupBox).Visible := v;
+      if Components[i] is TComboBox then
+        (Components[i] as TComboBox).Visible := v;
+    end;
+end;
+
+//----------------------------------------------------------------------------//
 
 initialization
 begin
@@ -610,6 +679,7 @@ begin
   mapGraph.hashFunc := matrixHashFunc;
   mapGraph.height := 0;
   mapGraph.width := 0;
+
 end;
 
 //----------------------------------------------------------------------------//

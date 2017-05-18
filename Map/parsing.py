@@ -28,8 +28,9 @@ for way in root.findall('way'):
         if k == 'sidewalk':
             if v != 'no': sidewalk = True
         if k == 'lanes':
-        	weight = v[0]
-        	weich = True
+        	if v[0] != 'q': 
+        		weight = v[0]
+        		weich = True
         	continue
         if k == 'highway':
             if v == 'road':
@@ -46,21 +47,21 @@ for way in root.findall('way'):
                 exist = True
                 if not revch: rever = True
                 if not weich:
-                	weight = w[v];
+                	weight = w[v]
                 continue
             if v in {'motorway_link', 'trunk_link', 'primary_link', 'secondary_link', ' tertiary_link'}:
                 movingType = 'car'
                 exist = True
                 if not revch: rever = False
                 if not weich:
-                	weight = w[v[:-5]];
+                	weight = w[v[:-5]]
                 continue
             if v == 'motorway':
                 movingType = 'car'
                 exist = True
                 if not revch: rever = False
                 if not weich:
-                	weight = w[v];
+                	weight = w[v]
                 continue
     if not exist: continue 	
     if movingType == 'car': weight = str(1 + int(weight))

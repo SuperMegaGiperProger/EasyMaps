@@ -5,7 +5,7 @@ unit MainUnit;
 interface
 
 uses
-  GraphUnit, GeoUnit, Graphics, MapLoaderUnit;
+  GraphUnit, GeoUnit, Graphics, MapLoaderUnit, DrawUnit;
 
 procedure main;
 
@@ -109,11 +109,6 @@ begin
 
                          }
 end;
-
-//----------------------------------------------------------------------------//
-
-initialization
-  main;
 
 //----------------------------------------------------------------------------//
 

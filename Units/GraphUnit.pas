@@ -120,6 +120,11 @@ try
   ////preparation
   Form1.Gauge.Progress := 0;
   n := length(point);
+  if n <= 1 then
+  begin
+    result := true;
+    exit;
+  end;
   SetLength(g, n);
   SetLength(used, n);
   SetLength(d, n);
