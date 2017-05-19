@@ -7,7 +7,8 @@ interface
 uses
   HashUnit, GeoUnit, MapLoaderUnit, GraphUnit, listOfPointersUnit,
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, ShellAPI,  Math, Gauges, ExtCtrls, StdCtrls, Buttons, ComCtrls;
+  Dialogs, ShellAPI,  Math, Gauges, ExtCtrls, StdCtrls, Buttons, ComCtrls,
+  ColorGrd;
 
 type
   TForm1 = class(TForm)
@@ -30,13 +31,27 @@ type
     ComboBoxCity: TComboBox;
     BitBtn1: TBitBtn;
     BitBtn3: TBitBtn;
-    TrackBarDrawingRadius: TTrackBar;
     LabelDist: TLabel;
     GroupBox3: TGroupBox;
     GroupBoxLoad: TGroupBox;
     CheckBoxCarLoad: TCheckBox;
     CheckBoxFootLoad: TCheckBox;
     BitBtn5: TBitBtn;
+    SettingsBtn: TBitBtn;
+    GroupBoxSettings: TGroupBox;
+    TrackBarDrawingRadius: TTrackBar;
+    BitBtn6: TBitBtn;
+    Label4: TLabel;
+    Label5: TLabel;
+    CheckBoxFootRoad: TCheckBox;
+    ColorGridRoads: TColorGrid;
+    Label6: TLabel;
+    Label7: TLabel;
+    ColorGridWay: TColorGrid;
+    ColorGridBackground: TColorGrid;
+    Label8: TLabel;
+    Label9: TLabel;
+    ColorGridArrow: TColorGrid;
     procedure LoadBtnClick(Sender: TObject);
     procedure mapImageMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
@@ -62,6 +77,12 @@ type
     procedure BitBtn1Click(Sender: TObject);
     procedure BitBtn3Click(Sender: TObject);
     procedure BitBtn5Click(Sender: TObject);
+    procedure SettingsBtnClick(Sender: TObject);
+    procedure BitBtn6Click(Sender: TObject);
+    procedure ColorGridRoadsChange(Sender: TObject);
+    procedure ColorGridWayChange(Sender: TObject);
+    procedure ColorGridBackgroundChange(Sender: TObject);
+    procedure ColorGridArrowChange(Sender: TObject);
   private
     { Private declarations }
   public
@@ -153,7 +174,7 @@ begin
   with Form1.mapImage.Canvas do
   begin
     Pen.Style := psClear;
-    Brush.Color := clWhite;
+    Brush.Color := Form1.ColorGridBackground.ForegroundColor;
     Rectangle(x - pointPicture.Width div 2, y - pointPicture.Height,
       x + (pointPicture.Width + 1) div 2 + 1, y + 1);
     Pen.Style := psSolid;
@@ -218,7 +239,7 @@ begin
     it := TEltPt(it2^.data);
     while it <> nil do
     begin
-      Form1.mapImage.Canvas.Pen.Color := clGreen;
+      Form1.mapImage.Canvas.Pen.Color := Form1.ColorGridWay.ForegroundColor;
       drawRoad(TEdgePt(it^.data)^, direction);
       it := it^.next;
     end;
@@ -256,7 +277,7 @@ begin
     if x1 = x2 then angle := pi / 2
     else angle := arctan((y2 - y1) * 1.0 / ((x2 - x1) * 1.0));
     if x2 - x1 < 0 then angle := angle + pi;
-    Form1.mapImage.Canvas.Pen.Color := clBlack;
+    Form1.mapImage.Canvas.Pen.Color := Form1.ColorGridArrow.ForegroundColor;
     Form1.mapImage.Canvas.Pen.Width := 2;
     drawArrow(x2 - (x2 - x1) div 2 + round((len + 15) * cos(angle) / 2),
       y2 - (y2 - y1) div 2 + round((len + 15) * sin(angle) / 2), angle, len);
@@ -358,9 +379,15 @@ var
   v: TVertex;
   i, j: integer;
 begin
-  if clear then Form1.mapImage.Picture.Graphic := nil;
-  Form1.mapImage.Canvas.Brush.Color := clRed;
-  Form1.mapImage.Canvas.Pen.Color := clRed;
+  if clear then
+  begin
+    with Form1.mapImage do
+    begin
+      Canvas.Brush.Color := Form1.ColorGridBackground.ForegroundColor;
+      Canvas.FillRect(Rect(0, 0, Width, Height));
+    end;
+  end;
+  Form1.mapImage.Canvas.Pen.Color := Form1.ColorGridRoads.ForegroundColor;
   with mapGraph do
   begin
     for i := max(hashFunc(y1 - minY - DRAWING_RADIUS, k), 0) to
@@ -456,38 +483,38 @@ begin
       Height - round((prevY0 - y0) / scale)), Canvas, Rect(0, 0, Width, Height));
     if x - xm > 0 then  // ->
     begin
-      Canvas.Brush.Color := clWhite;
+      Canvas.Brush.Color := Form1.ColorGridBackground.ForegroundColor;
       Canvas.Pen.Style := psClear;
       Canvas.Rectangle(0, 0, x - xm + 1, Height);
-      Canvas.Brush.Color := clRed;
+      Canvas.Brush.Color := Form1.ColorGridRoads.ForegroundColor;
       Canvas.Pen.Style := psSolid;
       drawGraph(x0, y0 - Height * scale, x0 + (x - xm) * scale, y0, false);
     end
     else  // <-
     begin
-      Canvas.Brush.Color := clWhite;
+      Canvas.Brush.Color := Form1.ColorGridBackground.ForegroundColor;
       Canvas.Pen.Style := psClear;
       Canvas.Rectangle(width + x - xm - 1, 0, width, Height);
-      Canvas.Brush.Color := clRed;
+      Canvas.Brush.Color := Form1.ColorGridRoads.ForegroundColor;
       Canvas.Pen.Style := psSolid;
       drawGraph(x0 + (width + x - xm) * scale, y0 - Height * scale,
         x0 + width * scale, y0, false);
     end;
     if y - ym > 0 then  // \/
     begin
-      Canvas.Brush.Color := clWhite;
+      Canvas.Brush.Color := Form1.ColorGridBackground.ForegroundColor;
       Canvas.Pen.Style := psClear;
       Canvas.Rectangle(0, 0, width, y - ym + 1);
-      Canvas.Brush.Color := clRed;
+      Canvas.Brush.Color := Form1.ColorGridRoads.ForegroundColor;
       Canvas.Pen.Style := psSolid;
       drawGraph(x0, y0 - (y - ym) * scale, x0 + width * scale, y0, false);
     end
     else  // ^
     begin
-      Canvas.Brush.Color := clWhite;
+      Canvas.Brush.Color := Form1.ColorGridBackground.ForegroundColor;
       Canvas.Pen.Style := psClear;
       Canvas.Rectangle(0, height + y - ym - 1, width, Height);
-      Canvas.Brush.Color := clRed;
+      Canvas.Brush.Color := Form1.ColorGridRoads.ForegroundColor;
       Canvas.Pen.Style := psSolid;
       drawGraph(x0, y0 - Height * scale, x0 + width * scale,
         y0 - (Height + y - ym) * scale, false);
@@ -520,6 +547,7 @@ procedure TForm1.BitBtn2Click(Sender: TObject);
 var
   movSet: TMovingTypeSet;
 begin
+  way := nil;
   movSet := [];
   if CheckBoxFoot.Checked then Include(movSet, foot);
   if CheckBoxCar.Checked then Include(movSet, car);
@@ -586,10 +614,43 @@ begin
 end;
 
 //////////////////////// SETTINGS /////////////////////////
+procedure TForm1.SettingsBtnClick(Sender: TObject);
+begin
+  GroupBoxSettings.Left := (Form1.Width - GroupBoxSettings.Width) div 2;
+  GroupBoxSettings.Top := (Form1.Height - GroupBoxSettings.Height) div 2;
+  GroupBoxSettings.Visible := true;
+end;
+
+procedure TForm1.BitBtn6Click(Sender: TObject);
+begin
+  GroupBoxSettings.Visible := false;
+end;
+
 procedure TForm1.TrackBarDrawingRadiusChange(Sender: TObject);
 begin
   DRAWING_RADIUS := MIN_DRAWING_RADIUS + (MAX_DRAWING_RADIUS -
     MIN_DRAWING_RADIUS) * TrackBarDrawingRadius.Position / 100.0;
+end;
+                        
+procedure TForm1.ColorGridRoadsChange(Sender: TObject);
+begin
+  drawFullGraph;
+end;
+
+procedure TForm1.ColorGridWayChange(Sender: TObject);
+begin
+  drawWay(way);
+  drawWay(way, true);
+end;
+
+procedure TForm1.ColorGridBackgroundChange(Sender: TObject);
+begin
+  drawFullGraph;
+end;
+
+procedure TForm1.ColorGridArrowChange(Sender: TObject);
+begin
+  drawWay(way, true);
 end;
 
 /////////////////////// START PAGE ///////////////////////
@@ -655,7 +716,7 @@ begin
   MapImage.Visible := true;
   Label3.Visible := False;
   ComboBoxCity.Visible := false;
-  TrackBarDrawingRadius.Visible := false;
+  GroupBoxSettings.Visible := false;
 end;
 
 ///////////////////////// FORM /////////////////////////////

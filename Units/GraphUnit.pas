@@ -297,6 +297,8 @@ var
   minV: TVertexPt;  // vertex with min distation
   heap: TBinHeap;
 begin
+  if Form1.CheckBoxFootRoad.Checked and (foot in movingTypeSet) then
+    include(movingtypeset, car);
   preparationForGettingTheShortestWay;
   result := false;
   way := nil;
@@ -366,7 +368,7 @@ begin
   if reversible then
     createEdge(b, a, weight, width, movingType);
   inc(EdgeNum);
-  if movingType = car then createEdge(a, b, weight, 1, foot, true);
+  //if movingType = car then createEdge(a, b, weight, 1, foot, true);
 end;
 
 function compareVertices(a, b: Pointer): boolean;
