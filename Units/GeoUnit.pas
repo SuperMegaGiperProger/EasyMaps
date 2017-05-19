@@ -58,8 +58,9 @@ end;
 
 function distation(v1, v2: TVertexPt): real;
 begin
-  result := sin(v1^.latitude) * sin(v2^.latitude) +
-    cos(v1^.latitude) * cos(v2^.latitude) * cos(v1^.longitude - v2^.longitude);
+  result := sin(DegToRad(v1^.latitude)) * sin(DegToRad(v2^.latitude)) +
+    cos(DegToRad(v1^.latitude)) * cos(DegToRad(v2^.latitude)) *
+    cos(DegToRad(v1^.longitude - v2^.longitude));
   result := R * arccos(result);
 end;
  

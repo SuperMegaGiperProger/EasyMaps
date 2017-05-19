@@ -5,9 +5,9 @@ unit DrawUnit;
 interface                   
 
 uses
+  HashUnit, GeoUnit, MapLoaderUnit, GraphUnit, listOfPointersUnit,
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, GraphUnit, ExtCtrls, listOfPointersUnit, StdCtrls, Buttons,
-  HashUnit, ShellAPI, GeoUnit, Math, ComCtrls, Gauges, MapLoaderUnit, Tabs;
+  Dialogs, ShellAPI,  Math, Gauges, ExtCtrls, StdCtrls, Buttons, ComCtrls;
 
 type
   TForm1 = class(TForm)
@@ -28,6 +28,15 @@ type
     CheckBoxFoot: TCheckBox;
     Label3: TLabel;
     ComboBoxCity: TComboBox;
+    BitBtn1: TBitBtn;
+    BitBtn3: TBitBtn;
+    TrackBarDrawingRadius: TTrackBar;
+    LabelDist: TLabel;
+    GroupBox3: TGroupBox;
+    GroupBoxLoad: TGroupBox;
+    CheckBoxCarLoad: TCheckBox;
+    CheckBoxFootLoad: TCheckBox;
+    BitBtn5: TBitBtn;
     procedure LoadBtnClick(Sender: TObject);
     procedure mapImageMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
@@ -49,6 +58,10 @@ type
     procedure FormCanResize(Sender: TObject; var NewWidth,
       NewHeight: Integer; var Resize: Boolean);
     procedure FormActivate(Sender: TObject);
+    procedure TrackBarDrawingRadiusChange(Sender: TObject);
+    procedure BitBtn1Click(Sender: TObject);
+    procedure BitBtn3Click(Sender: TObject);
+    procedure BitBtn5Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -56,25 +69,27 @@ type
   end;
 
 const
-  STANDART_RADIUS = 0.00005;
   STANDART_WIDTH = 0.0032;
   MAX_SCALE = 0.01758;
   MIN_SCALE = 0.0005;
-  DRAWING_RADIUS =  0.500;  // km
+  MIN_DRAWING_RADIUS =  0.005;  // km
 
 var
   Form1: TForm1;
-  scale: real = 0.001;
-  latitude0: real = 53.93;
-  longitude0: real =  27.58;
+  scale: real = 0.0058576146516;
+  DRAWING_RADIUS: real = 0.274;  // km
   x0, y0: real;
-  way: TListOfPointers = nil;
-  pointPicture: TBitmap;
   topBorder, bottomBorder, leftBorder, rightBorder: real;  // in Decart coord
+  points: array of TVertexPt = nil;
+  way: TListOfPointers = nil;
+  MAX_DRAWING_RADIUS: real = 0.000;  // km  // depends on map
 
-procedure drawFullGraph;
+
 procedure drawGraph(x1, y1, x2, y2: real; clear: boolean = true);
+procedure drawFullGraph;            
+procedure drawRoad(edge: TEdge; direction: boolean = false);
 procedure setComponentsVisible(v: boolean = true);
+function findClosestVertex(X, Y: real): TVertexPt;
 
 //----------------------------------------------------------------------------//
 
@@ -92,11 +107,40 @@ begin
   result := round((y0 - getYDecartCoordinates(latitude)) / scale);
 end;
 
-procedure drawPoint(x, y, num: integer);
+///////////////////////// POINTS /////////////////////////////////
+var
+  pointPicture, deletePointPicture: TBitmap;
+  pointAddition: boolean = true;
+
+procedure addPoint(v: TVertexPt);
+begin
+  if v = nil then exit;
+  SetLength(points, length(points) + 1);
+  points[length(points) - 1] := v;
+  way := nil;
+  DrawFullGraph;
+end;
+
+procedure deletePoint(v: TVertexPt);
+var
+  i, n: integer;
+begin
+  n := length(points);
+  for i := 0 to n - 1 do
+    if points[i] = v then break;
+  if i >= n then exit;
+  for i := i + 1 to n - 1 do
+    points[i - 1] := points[i];
+  SetLength(points, n - 1);
+  way := nil;
+  DrawFullGraph;
+end;
+
+procedure drawPoint(x, y, num: integer; picture: TBitmap);
 begin
   with Form1.mapImage.Canvas do
   begin
-    Draw(x - pointPicture.Width div 2, y - pointPicture.Height, pointPicture);
+    Draw(x - picture.Width div 2, y - picture.Height, picture);
     Font.Name := 'Arial';
     Font.Style := [fsBold];
     Brush.Style := bsClear;
@@ -119,31 +163,70 @@ begin
   end;
 end;
 
+procedure drawPoints(point: array of TVertexPt);
+var
+  i: integer;
+begin
+  for i := 0 to length(point) - 1 do
+    drawPoint(getX(point[i]^.longitude), getY(point[i]^.latitude), i + 1,
+      pointPicture);
+end;
+
+procedure TForm1.BitBtn4Click(Sender: TObject);  // delete all
+begin
+  points := nil;
+  way := nil;
+  DrawFullGraph;
+  pointAddition := true;
+end;
+
+procedure TForm1.BitBtn1Click(Sender: TObject);  // delete
+begin
+  pointAddition := False;
+end;
+
+procedure TForm1.BitBtn3Click(Sender: TObject);
+begin
+  pointAddition := true;
+end;
+
+///////////////////////////// WAY /////////////////////////////
 procedure drawArrow(x, y: integer; angle: real = 0; length: integer = 20);
 var
   stx, sty: integer;
 begin
   with Form1.mapImage.Canvas do
   begin
-    {moveTo(x, y);
-    lineTo(x - round(length * cos(angle)), y - round(length * sin(angle)));}
     stx := x - round(length * cos(angle) / 1.2);
     sty := y - round(length * sin(angle) / 1.2);
     angle := angle + pi / 2;
-    {moveTo(x, y);
-    lineTo(stx - round(length * cos(angle) / 2),
-      sty - round(length * sin(angle) / 4));
-    moveTo(x, y);
-    lineTo(stx + round(length * cos(angle) / 2),
-      sty + round(length * sin(angle) / 4));}
     Brush.Color := Pen.Color;
     Polygon([Point(x, y), Point(stx - round(length * cos(angle) / 3),
       sty - round(length * sin(angle) / 3)),
       Point(stx + round(length * cos(angle) / 3),
       sty + round(length * sin(angle) / 3))]);
   end;
+end;      
+
+procedure drawWay(way: TListOfPointers; direction: boolean = false);
+var
+  it, it2: TEltPt;
+begin
+  it2 := way;
+  while it2 <> nil do
+  begin
+    it := TEltPt(it2^.data);
+    while it <> nil do
+    begin
+      Form1.mapImage.Canvas.Pen.Color := clGreen;
+      drawRoad(TEdgePt(it^.data)^, direction);
+      it := it^.next;
+    end;
+    it2 := it2^.next;
+  end;
 end;
 
+////////////////////////////// ROADS /////////////////////////////////
 procedure setStyle(edge: TEdge);
 begin
   with Form1.mapImage.Canvas do
@@ -210,117 +293,7 @@ begin
   end;
 end;
 
-procedure drawWay(way: TListOfPointers; direction: boolean = false);
-var
-  it, it2: TEltPt;
-begin
-  it2 := way;
-  while it2 <> nil do
-  begin
-    it := TEltPt(it2^.data);
-    while it <> nil do
-    begin
-      Form1.mapImage.Canvas.Pen.Color := clGreen;
-      drawRoad(TEdgePt(it^.data)^, direction);
-      it := it^.next;
-    end;
-    it2 := it2^.next;
-  end;
-end;
-
-procedure drawPoints(point: array of TVertexPt);
-var
-  i: integer;
-begin
-  for i := 0 to length(point) - 1 do
-    drawPoint(getX(point[i]^.longitude), getY(point[i]^.latitude), i + 1);
-end;
-
-var
-  movType: TMovingType = car;
-  arr: array of TVertexPt;
-
-function min(a, b: integer): integer;
-begin
-  if a < b then result := a
-  else result := b;
-end;
-
-function max(a, b: integer): integer;
-begin
-  if a > b then result := a
-  else result := b;
-end;
-
-procedure drawGraph(x1, y1, x2, y2: real; clear: boolean = true);
-var
-  it: TEltPt;
-  v: TVertex;
-  i, j: integer;
-begin
-  if clear then Form1.mapImage.Picture.Graphic := nil;
-  Form1.mapImage.Canvas.Brush.Color := clRed;
-  Form1.mapImage.Canvas.Pen.Color := clRed;
-  with mapGraph do
-  begin
-    for i := max(hashFunc(y1 - minY - DRAWING_RADIUS, k), 0) to
-      min(hashFunc(y2 - minY + DRAWING_RADIUS, k), height - 1) do
-    begin
-      for j := max(hashFunc(x1 - minX - DRAWING_RADIUS, k), 0) to
-        min(hashFunc(x2 - minX + DRAWING_RADIUS, k), width - 1) do
-      begin
-        it := mapGraph.table[i][j];
-        while it <> nil do
-        begin
-          v := TVertexPt(it^.data)^;
-          //drawVertex(v);
-          drawAllRoads(v);
-          it := it^.next;
-        end;
-      end;
-    end;
-  end;
-  drawWay(way);
-  drawWay(way, true);
-  drawPoints(arr);
-end;
-
-procedure drawFullGraph;
-begin
-  drawGraph(x0, y0 - Form1.mapImage.Height * scale,
-    x0 + Form1.mapImage.Width * scale, y0);
-end;
-
-procedure TForm1.LoadBtnClick(Sender: TObject);
-var
-  filename: string;
-begin
-  case ComboBoxCity.ItemIndex of
-    2: filename := 'minsk';
-    5: filename := 'glasgow_scotland';
-    4: filename := 'kyiv_ukraine';
-    3: filename := 'las-vegas_nevada';
-    1: filename := 'riga_latvia';
-    0: filename := 'singapore';
-    else
-      begin
-        ShowMessage('Выберите город');
-        exit;
-      end;
-  end;
-  LoadBtn.Visible := false;
-  Form1.Label3.Visible := true;
-  ComboBoxCity.Visible := false;
-  Form1.Repaint;
-  LoadMapFromFile('Map\' + filename + '.txt');
-  DrawFullGraph;
-  setComponentsVisible;
-  LoadBtn.Visible := false;
-  MapImage.Visible := true;
-  Label3.Visible := False;
-  ComboBoxCity.Visible := false;
-end;
-
+/////////////////////////// GRAPH ///////////////////////////////
 function findClosestVertex(X, Y: real): TVertexPt;
 const
   SEARCHING_RADIUS = 20;  // px
@@ -367,6 +340,56 @@ begin
   end;
 end;
 
+function min(a, b: integer): integer;
+begin
+  if a < b then result := a
+  else result := b;
+end;
+
+function max(a, b: integer): integer;
+begin
+  if a > b then result := a
+  else result := b;
+end;
+
+procedure drawGraph(x1, y1, x2, y2: real; clear: boolean = true);
+var
+  it: TEltPt;
+  v: TVertex;
+  i, j: integer;
+begin
+  if clear then Form1.mapImage.Picture.Graphic := nil;
+  Form1.mapImage.Canvas.Brush.Color := clRed;
+  Form1.mapImage.Canvas.Pen.Color := clRed;
+  with mapGraph do
+  begin
+    for i := max(hashFunc(y1 - minY - DRAWING_RADIUS, k), 0) to
+      min(hashFunc(y2 - minY + DRAWING_RADIUS, k), height - 1) do
+    begin
+      for j := max(hashFunc(x1 - minX - DRAWING_RADIUS, k), 0) to
+        min(hashFunc(x2 - minX + DRAWING_RADIUS, k), width - 1) do
+      begin
+        it := mapGraph.table[i][j];
+        while it <> nil do
+        begin
+          v := TVertexPt(it^.data)^;
+          drawAllRoads(v);
+          it := it^.next;
+        end;
+      end;
+    end;
+  end;
+  drawWay(way);  // for first draw way
+  drawWay(way, true);  // for second - direction, because way can be drew over
+  drawPoints(points);
+end;
+
+procedure drawFullGraph;
+begin
+  drawGraph(x0, y0 - Form1.mapImage.Height * scale,
+    x0 + Form1.mapImage.Width * scale, y0);
+end;
+
 procedure drawTheShortestWayTroughSeveralPoints(point: array of TVertexPt;
   start: boolean = false; finish: boolean = false;
   movingTypeSet: TMovingTypeSet = [car, foot, plane]);
@@ -379,17 +402,18 @@ begin
   Form1.Gauge.Visible := false;
   if not exist then
   begin
+    Form1.LabelDist.Caption := 'INF';
     ShowMessage('Путь не найден');
     exit;
   end;
+  Form1.LabelDist.Caption := IntToStr(round(dist * 1000));
   drawFullgraph;
 end;
 
+///////////////////////////// MAP ////////////////////////////////////
 var
   move, itWasMoving: boolean;
   xm, ym: integer;
-
-var
   lastPointV: TVertexPt = nil;
 
 procedure TForm1.mapImageMouseMove(Sender: TObject; Shift: TShiftState; X,
@@ -403,8 +427,12 @@ begin
       getY(lastPointV^.latitude));
     lastPointV := findClosestVertex(x, y);
     if lastPointV <> nil then
-      drawPoint(getX(lastPointV^.longitude), getY(lastPointV^.latitude),
-        length(arr) + 1);
+      if pointAddition then
+        drawPoint(getX(lastPointV^.longitude), getY(lastPointV^.latitude),
+          length(points) + 1, pointPicture)
+      else
+        drawPoint(getX(lastPointV^.longitude), getY(lastPointV^.latitude),
+          0, deletePointPicture);
     exit;
   end;
   prevX0 := x0;
@@ -481,17 +509,11 @@ end;
 
 procedure TForm1.mapImageMouseUp(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
-var
-  v: TVertexPt;
 begin
   move := false;
-  if itWasMoving then exit;
-  v := findClosestVertex(x, y);
-  if v = nil then exit;
-  Form1.mapImage.Canvas.Brush.Color := clBlue;
-  Form1.mapImage.Canvas.Pen.Color := clBlue;
-  SetLength(arr, length(arr) + 1);
-  arr[length(arr) - 1] := v;
+  if not itWasMoving then
+    if pointAddition then addPoint(lastPointV)
+    else deletePoint(lastPointV);
 end;
 
 procedure TForm1.BitBtn2Click(Sender: TObject);
@@ -501,33 +523,11 @@ begin
   movSet := [];
   if CheckBoxFoot.Checked then Include(movSet, foot);
   if CheckBoxCar.Checked then Include(movSet, car);
-  drawTheShortestWayTroughSeveralPoints(arr, CheckBoxStart.Checked,
+  drawTheShortestWayTroughSeveralPoints(points, CheckBoxStart.Checked,
     CheckBoxFinish.Checked, movSet);
 end;
 
-procedure TForm1.BitBtn4Click(Sender: TObject);
-begin
-  SetLength(arr, 0);
-  way := nil;
-  DrawFullGraph;
-end;
-
-procedure TForm1.Label2Click(Sender: TObject);
-begin
-  ShellExecute(Application.Handle, nil, 'http://www.openstreetmap.org/',
-    nil, nil,SW_SHOWNOACTIVATE);
-end;
-
-procedure TForm1.Label2MouseEnter(Sender: TObject);
-begin
-  Label2.Font.Style := [fsUnderline];
-end;
-
-procedure TForm1.Label2MouseLeave(Sender: TObject);
-begin
-  Label2.Font.Style := [];
-end;
-
+//////////////////////// SCALE ////////////////////////////
 function onMap(MousePos: TPoint): boolean;
 begin
   with form1 do
@@ -579,10 +579,106 @@ begin
 end;
 
 procedure TForm1.SpeedButton2Click(Sender: TObject);
-begin       
+begin
   if scale >= MAX_SCALE then exit;
   scale := scale + dScale;
   drawFullGraph;
+end;
+
+//////////////////////// SETTINGS /////////////////////////
+procedure TForm1.TrackBarDrawingRadiusChange(Sender: TObject);
+begin
+  DRAWING_RADIUS := MIN_DRAWING_RADIUS + (MAX_DRAWING_RADIUS -
+    MIN_DRAWING_RADIUS) * TrackBarDrawingRadius.Position / 100.0;
+end;
+
+/////////////////////// START PAGE ///////////////////////
+
+procedure makeStartPage;
+begin
+  with Form1 do
+  begin
+    setComponentsVisible(false);
+    //mapImage.Visible := true;
+    //mapImage.Picture.LoadFromFile('Images\backgroundMap.bmp');
+    LoadBtn.Visible := true;
+    MapImage.Visible := false;
+    ComboBoxCity.Visible := true;
+    GroupBoxLoad.Visible := true;
+  end;
+end;
+
+procedure TForm1.BitBtn5Click(Sender: TObject);
+begin
+  makeStartPage;
+end;
+
+procedure TForm1.FormActivate(Sender: TObject);
+begin
+  makeStartPage;
+end;
+
+procedure TForm1.LoadBtnClick(Sender: TObject);
+var
+  filename: string;
+begin
+  if not (CheckBoxCarLoad.Checked or CheckBoxFootLoad.Checked) then
+  begin
+    ShowMessage('Выберите хотя бы один тип дорог');
+    exit;
+  end;
+  case ComboBoxCity.ItemIndex of
+    2: filename := 'minsk';
+    5: filename := 'glasgow_scotland';
+    4: filename := 'kyiv_ukraine';
+    3: filename := 'las-vegas_nevada';
+    1: filename := 'riga_latvia';
+    0: filename := 'singapore';
+    6: filename := 'map';
+    else
+      begin
+        ShowMessage('Выберите город');
+        exit;
+      end;
+  end;
+  LoadBtn.Visible := false;
+  GroupBoxLoad.Visible := false;
+  Form1.Label3.Visible := true;
+  ComboBoxCity.Visible := false;
+  Form1.Repaint;
+  LoadMapFromFile('Map\' + filename + '.txt', CheckBoxCarLoad.Checked,
+    CheckBoxFootLoad.Checked);
+  DrawFullGraph;
+  setComponentsVisible;
+  LoadBtn.Visible := false;
+  GroupBoxLoad.Visible := false;
+  MapImage.Visible := true;
+  Label3.Visible := False;
+  ComboBoxCity.Visible := false;
+  TrackBarDrawingRadius.Visible := false;
+end;
+
+///////////////////////// FORM /////////////////////////////
+procedure setComponentsVisible(v: boolean = true);
+var
+  i: integer;
+begin
+  with Form1 do
+    for i := 0 to ComponentCount - 1 do
+    begin
+      if Components[i] is TBitBtn then
+        (Components[i] as TBitBtn).Visible := v;
+      if Components[i] is TSpeedButton then
+        (Components[i] as TSpeedButton).Visible := v;
+      if Components[i] is TLabel then
+        (Components[i] as TLabel).Visible := v;
+      if Components[i] is TGroupBox then
+        (Components[i] as TGroupBox).Visible := v;
+      if Components[i] is TComboBox then
+        (Components[i] as TComboBox).Visible := v;
+      if Components[i] is TTrackBar then
+        (Components[i] as TTrackBar).Visible := v;
+    end;
 end;
 
 procedure TForm1.FormCanResize(Sender: TObject; var NewWidth,
@@ -634,47 +730,33 @@ begin
   SpeedButton2.Top := NewHeight - 140 + SpeedButton1.Height;
 end;
 
-procedure TForm1.FormActivate(Sender: TObject);
+///////////////////////// SOURCE LINK /////////////////////////////////
+procedure TForm1.Label2Click(Sender: TObject);
 begin
-  setComponentsVisible(false);
-  LoadBtn.Visible := true;
-  MapImage.Visible := false;
-  ComboBoxCity.Visible := true;
+  ShellExecute(Application.Handle, nil, 'http://www.openstreetmap.org/',
+    nil, nil,SW_SHOWNOACTIVATE);
 end;
 
-procedure setComponentsVisible(v: boolean = true);
-var
-  i: integer;
+procedure TForm1.Label2MouseEnter(Sender: TObject);
 begin
-  with Form1 do
-    for i := 0 to ComponentCount - 1 do
-    begin
-      if Components[i] is TBitBtn then
-        (Components[i] as TBitBtn).Visible := v;
-      if Components[i] is TSpeedButton then
-        (Components[i] as TSpeedButton).Visible := v;
-      if Components[i] is TLabel then
-        (Components[i] as TLabel).Visible := v;
-      if Components[i] is TGroupBox then
-        (Components[i] as TGroupBox).Visible := v;
-      if Components[i] is TComboBox then
-        (Components[i] as TComboBox).Visible := v;
-    end;
+  Label2.Font.Style := [fsUnderline];
+end;
+
+procedure TForm1.Label2MouseLeave(Sender: TObject);
+begin
+  Label2.Font.Style := [];
 end;
 
 //----------------------------------------------------------------------------//
 
 initialization
 begin
-  scale := 0.0058576146516;
-  latitude0 := 53.920940;
-  longitude0 := 27.584859;
-  x0 := getXDecartCoordinates(longitude0) - 0.1;
-  y0 := getYDecartCoordinates(latitude0) + 0.1;
-
   pointPicture := TBitmap.Create;
   pointPicture.LoadFromFile('Images\point.bmp');
   pointPicture.Transparent := true;
+  deletePointPicture := TBitmap.Create;
+  deletePointPicture.LoadFromFile('Images\deletePoint.bmp');
+  deletePointPicture.Transparent := true;
 
   mapGraph.hashFunc := matrixHashFunc;
   mapGraph.height := 0;

@@ -116,6 +116,7 @@ var
   iterationNum: int64;  // sum of cycles iterations number
   iterationCount: int64;
 begin
+result := false;
 try
   ////preparation
   Form1.Gauge.Progress := 0;
@@ -365,7 +366,7 @@ begin
   if reversible then
     createEdge(b, a, weight, width, movingType);
   inc(EdgeNum);
-  //if movingType = car then createEdge(a, b, weight, foot, true);
+  if movingType = car then createEdge(a, b, weight, 1, foot, true);
 end;
 
 function compareVertices(a, b: Pointer): boolean;
@@ -385,6 +386,7 @@ begin
   newV^.latitude := latitude;
   newV^.longitude := longitude;
   newV^.id := id;
+  newV^.used := false;
   with newV^ do
   begin
     edgesList := nil;

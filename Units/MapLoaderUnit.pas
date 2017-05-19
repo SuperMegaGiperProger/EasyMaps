@@ -5,12 +5,13 @@ unit MapLoaderUnit;
 interface
 
 const
-  MIN_CELL_CAPARCITY = 0.1;  // km  // cell in hash matrix
+  MIN_CELL_CAPARCITY = 0.100;  // km  // cell in hash matrix
 
 var
   memorySize: integer = 100 * 1024 * 1024;  // to store graph
 
-function LoadMapFromFile(fileName: string): boolean;
+function LoadMapFromFile(fileName: string; carLoad: boolean = true;
+  footLoad: boolean = false): boolean;
 
 //----------------------------------------------------------------------------//
 
@@ -37,7 +38,8 @@ begin
   Form1.Gauge.Progress := trunc(FilePos(f) * 100.0 / FileSize(f));
 end;
 
-function LoadMapFromFile(fileName: string): boolean;
+function LoadMapFromFile(fileName: string; carLoad: boolean = true;
+  footLoad: boolean = false): boolean;
 var
   f: TextFile;
   str: string;
@@ -52,7 +54,7 @@ var
   k, h, w: real;
   i: integer;
   it: TEltPt;
-  v: TVertex;
+  v: TVertexPt;
   //cnt, j: integer;
 begin
   Form1.Gauge.Progress := 0;
@@ -110,12 +112,17 @@ begin
         while not eof(f) do
         begin
           readln(f, str);
+          printProgress(f);
           if str = '' then break;
+          if (mov = car) and not carLoad then continue;
+          if (mov = foot) and not footLoad then continue;
           id := StrToInt64(str);
           v2 := TVertexPt(get(vertList, id, correctVertexId)^.data);
           createEdge(v1, v2, distation(v1, v2), width, mov, rev);
+          maximize(MAX_DRAWING_RADIUS, distation(v1, v2));
+          v1^.used := true;
+          v2^.used := true;
           v1 := v2;
-          printProgress(f);
         end;
       end;
       CloseFile(f);
@@ -150,15 +157,27 @@ begin
     it := vertList.table[i];
     while it <> nil do
     begin
-      v := TVertexPt(it^.data)^;
-      push(mapGraph, getYDecartCoordinates(v.latitude),
-        getXDecartCoordinates(v.longitude), it^.data);
+      v := TVertexPt(it^.data);
       it := it^.next;
+      if not v^.used then continue;
+      push(mapGraph, getYDecartCoordinates(v^.latitude),
+        getXDecartCoordinates(v^.longitude), v);
     end;
     Form1.Gauge.Progress := trunc((i + 1) * 100.0 / vertList.size);
   end;
   clear(vertList);
   Form1.Gauge.Visible := false;
+  ///// recommended drawing radius
+  Form1.TrackBarDrawingRadius.SelEnd := round(50 / (MAX_DRAWING_RADIUS -
+    MIN_DRAWING_RADIUS));
+  Form1.TrackBarDrawingRadius.SelStart := round(10 / (MAX_DRAWING_RADIUS -
+    MIN_DRAWING_RADIUS));
+  DRAWING_RADIUS := min(0.274, MAX_DRAWING_RADIUS);
+  Form1.TrackBarDrawingRadius.Position := round(100.0 * DRAWING_RADIUS /
+    (MAX_DRAWING_RADIUS - MIN_DRAWING_RADIUS));
+  ///// center of map
+  x0 := (rightBorder + leftBorder) / 2.0 - Form1.mapImage.Width * scale / 2.0;
+  y0 := (topBorder + bottomBorder) / 2.0 + Form1.mapImage.Height * scale / 2.0;
   {cnt := 0;
   for i := 0 to mapGraph.height - 1 do
     for j := 0 to mapGraph.width - 1 do

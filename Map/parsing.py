@@ -65,7 +65,7 @@ for way in root.findall('way'):
                 continue
     if not exist: continue 	
     if movingType == 'car': weight = str(1 + int(weight))
-    sidewalk = True
+    #sidewalk = True
     edges += [[movingType, weight, rever]]
     for v in way.findall('nd'):
         vertices |= {v.attrib['ref']}
