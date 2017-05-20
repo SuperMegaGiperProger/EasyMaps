@@ -1,5 +1,11 @@
 unit DrawUnit;
 
+
+
+////////////  CLEAR EDGES !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
 //----------------------------------------------------------------------------//
 
 interface                   
@@ -8,7 +14,7 @@ uses
   HashUnit, GeoUnit, MapLoaderUnit, GraphUnit, listOfPointersUnit,
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, ShellAPI,  Math, Gauges, ExtCtrls, StdCtrls, Buttons, ComCtrls,
-  ColorGrd;
+  ColorGrd, jpeg;
 
 type
   TForm1 = class(TForm)
@@ -27,7 +33,6 @@ type
     GroupBox2: TGroupBox;
     CheckBoxCar: TCheckBox;
     CheckBoxFoot: TCheckBox;
-    Label3: TLabel;
     ComboBoxCity: TComboBox;
     BitBtn1: TBitBtn;
     BitBtn3: TBitBtn;
@@ -36,7 +41,7 @@ type
     GroupBoxLoad: TGroupBox;
     CheckBoxCarLoad: TCheckBox;
     CheckBoxFootLoad: TCheckBox;
-    BitBtn5: TBitBtn;
+    ReselectMapBtn: TBitBtn;
     SettingsBtn: TBitBtn;
     GroupBoxSettings: TGroupBox;
     TrackBarDrawingRadius: TTrackBar;
@@ -52,6 +57,8 @@ type
     Label8: TLabel;
     Label9: TLabel;
     ColorGridArrow: TColorGrid;
+    ImageBack: TImage;
+    Label3: TLabel;
     procedure LoadBtnClick(Sender: TObject);
     procedure mapImageMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
@@ -76,7 +83,7 @@ type
     procedure TrackBarDrawingRadiusChange(Sender: TObject);
     procedure BitBtn1Click(Sender: TObject);
     procedure BitBtn3Click(Sender: TObject);
-    procedure BitBtn5Click(Sender: TObject);
+    procedure ReselectMapBtnClick(Sender: TObject);
     procedure SettingsBtnClick(Sender: TObject);
     procedure BitBtn6Click(Sender: TObject);
     procedure ColorGridRoadsChange(Sender: TObject);
@@ -104,6 +111,8 @@ var
   points: array of TVertexPt = nil;
   way: TListOfPointers = nil;
   MAX_DRAWING_RADIUS: real = 0.000;  // km  // depends on map
+  start: boolean = true;
+  background: TBitmap;
 
 
 procedure drawGraph(x1, y1, x2, y2: real; clear: boolean = true);
@@ -484,38 +493,30 @@ begin
     if x - xm > 0 then  // ->
     begin
       Canvas.Brush.Color := Form1.ColorGridBackground.ForegroundColor;
-      Canvas.Pen.Style := psClear;
-      Canvas.Rectangle(0, 0, x - xm + 1, Height);
+      Canvas.FillRect(Rect(0, 0, x - xm + 1, Height));
       Canvas.Brush.Color := Form1.ColorGridRoads.ForegroundColor;
-      Canvas.Pen.Style := psSolid;
       drawGraph(x0, y0 - Height * scale, x0 + (x - xm) * scale, y0, false);
     end
     else  // <-
     begin
       Canvas.Brush.Color := Form1.ColorGridBackground.ForegroundColor;
-      Canvas.Pen.Style := psClear;
-      Canvas.Rectangle(width + x - xm - 1, 0, width, Height);
+      Canvas.FillRect(Rect(width + x - xm - 1, 0, width, Height));
       Canvas.Brush.Color := Form1.ColorGridRoads.ForegroundColor;
-      Canvas.Pen.Style := psSolid;
       drawGraph(x0 + (width + x - xm) * scale, y0 - Height * scale,
         x0 + width * scale, y0, false);
     end;
     if y - ym > 0 then  // \/
     begin
       Canvas.Brush.Color := Form1.ColorGridBackground.ForegroundColor;
-      Canvas.Pen.Style := psClear;
-      Canvas.Rectangle(0, 0, width, y - ym + 1);
+      Canvas.FillRect(Rect(0, 0, width, y - ym + 1));
       Canvas.Brush.Color := Form1.ColorGridRoads.ForegroundColor;
-      Canvas.Pen.Style := psSolid;
       drawGraph(x0, y0 - (y - ym) * scale, x0 + width * scale, y0, false);
     end
     else  // ^
     begin
       Canvas.Brush.Color := Form1.ColorGridBackground.ForegroundColor;
-      Canvas.Pen.Style := psClear;
-      Canvas.Rectangle(0, height + y - ym - 1, width, Height);
+      Canvas.FillRect(Rect(0, height + y - ym - 1, width, Height));
       Canvas.Brush.Color := Form1.ColorGridRoads.ForegroundColor;
-      Canvas.Pen.Style := psSolid;
       drawGraph(x0, y0 - Height * scale, x0 + width * scale,
         y0 - (Height + y - ym) * scale, false);
     end;
@@ -528,6 +529,7 @@ end;
 procedure TForm1.mapImageMouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
+  if start then exit;
   xm := x;
   ym := y;
   move := true;
@@ -536,7 +538,8 @@ end;
 
 procedure TForm1.mapImageMouseUp(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
-begin
+begin                
+  if start then exit;
   move := false;
   if not itWasMoving then
     if pointAddition then addPoint(lastPointV)
@@ -645,6 +648,11 @@ end;
 
 procedure TForm1.ColorGridBackgroundChange(Sender: TObject);
 begin
+  label1.Color := ColorGridBackground.ForegroundColor;
+  if label1.Color = clGray then label1.Font.Color := clWhite
+  else label1.Font.Color := label1.Color xor $FFFFFF;
+  if label1.Color = clBlue then label2.Font.Color := clLime
+  else label2.Font.Color := clBlue;
   drawFullGraph;
 end;
 
@@ -654,22 +662,21 @@ begin
 end;
 
 /////////////////////// START PAGE ///////////////////////
-
 procedure makeStartPage;
 begin
   with Form1 do
   begin
     setComponentsVisible(false);
-    //mapImage.Visible := true;
-    //mapImage.Picture.LoadFromFile('Images\backgroundMap.bmp');
     LoadBtn.Visible := true;
-    MapImage.Visible := false;
     ComboBoxCity.Visible := true;
     GroupBoxLoad.Visible := true;
+    ImageBack.Picture.Bitmap := background;
+    ImageBack.Visible := true;
+    start := true;
   end;
 end;
 
-procedure TForm1.BitBtn5Click(Sender: TObject);
+procedure TForm1.ReselectMapBtnClick(Sender: TObject);
 begin
   makeStartPage;
 end;
@@ -677,6 +684,7 @@ end;
 procedure TForm1.FormActivate(Sender: TObject);
 begin
   makeStartPage;
+  Form1.Color := $202020;
 end;
 
 procedure TForm1.LoadBtnClick(Sender: TObject);
@@ -713,10 +721,11 @@ begin
   setComponentsVisible;
   LoadBtn.Visible := false;
   GroupBoxLoad.Visible := false;
-  MapImage.Visible := true;
   Label3.Visible := False;
   ComboBoxCity.Visible := false;
   GroupBoxSettings.Visible := false;
+  ImageBack.Visible := false;
+  start := false;
 end;
 
 ///////////////////////// FORM /////////////////////////////
@@ -739,6 +748,8 @@ begin
         (Components[i] as TComboBox).Visible := v;
       if Components[i] is TTrackBar then
         (Components[i] as TTrackBar).Visible := v;
+      if Components[i] is TImage then
+        (Components[i] as TImage).Visible := v;
     end;
 end;
 
@@ -755,25 +766,23 @@ begin
   mapImage.Width := NewWidth;
   mapImage.Picture.Bitmap.Height := NewHeight;
   mapImage.Picture.Bitmap.Width := Width;
+  ImageBack.Height := NewHeight;
+  ImageBack.Width := NewWidth;
   with Form1.mapImage do
   begin
     if x - xm > 0 then  // ->
     begin
-      Canvas.Brush.Color := clWhite;
-      Canvas.Pen.Style := psClear;
-      Canvas.Rectangle(xm - 1, 0, width, Height);
-      Canvas.Brush.Color := clRed;
-      Canvas.Pen.Style := psSolid;
+      Canvas.Brush.Color := Form1.ColorGridBackground.ForegroundColor;
+      Canvas.FillRect(Rect(xm - 1, 0, width, Height));
+      Canvas.Brush.Color := Form1.ColorGridRoads.ForegroundColor;
       drawGraph(x0 + xm * scale, y0 - Height * scale,
         x0 + width * scale, y0, false);
     end;
     if y - ym > 0 then  // \/
     begin
-      Canvas.Brush.Color := clWhite;
-      Canvas.Pen.Style := psClear;
-      Canvas.Rectangle(0, ym - 1, width, Height);
-      Canvas.Brush.Color := clRed;
-      Canvas.Pen.Style := psSolid;
+      Canvas.Brush.Color := Form1.ColorGridBackground.ForegroundColor;
+      Canvas.FillRect(Rect(0, ym - 1, width, Height));
+      Canvas.Brush.Color := Form1.ColorGridRoads.ForegroundColor;
       drawGraph(x0, y0 - Height * scale, x0 + width * scale,
         y0 - ym * scale, false);
     end;
@@ -782,6 +791,8 @@ begin
   Label1.Top := NewHeight - Label1.Height - 26;  // bottom
   Label2.Left := NewWidth - Label2.Width - 13;  // right
   Label2.Top := Label1.Top;  // bottom
+  Label3.Left := (NewWidth - Label3.Width) div 2;  // center
+  Label3.Top := (NewHeight - Label3.Height) div 2 - Gauge.Height - 20;
   Gauge.Width := round(NewWidth * 0.8);
   Gauge.Left := (NewWidth - Gauge.Width) div 2;  // center
   Gauge.Top := (NewHeight - Gauge.Height) div 2;  // center
@@ -789,6 +800,15 @@ begin
   SpeedButton1.Top := NewHeight - 140;
   SpeedButton2.Left := NewWidth - 60;
   SpeedButton2.Top := NewHeight - 140 + SpeedButton1.Height;
+  SettingsBtn.Left := NewWidth - 50;
+  ReselectMapBtn.Left := NewWidth - 170;
+  LoadBtn.Left := (NewWidth - LoadBtn.Width) div 2;
+  LoadBtn.Top := (NewHeight - LoadBtn.Height) div 2 - ComboBoxCity.Height - 20;
+  ComboBoxCity.Left := (NewWidth - ComboBoxCity.Width) div 2;
+  ComboBoxCity.Top := (NewHeight - ComboBoxCity.Height) div 2;
+  GroupBoxLoad.Left := (NewWidth - GroupBoxLoad.Width) div 2 +
+    ComboBoxCity.Width + 20;
+  GroupBoxLoad.Top := ComboBoxCity.Top;
 end;
 
 ///////////////////////// SOURCE LINK /////////////////////////////////
@@ -818,6 +838,8 @@ begin
   deletePointPicture := TBitmap.Create;
   deletePointPicture.LoadFromFile('Images\deletePoint.bmp');
   deletePointPicture.Transparent := true;
+  background := TBitmap.Create;
+  background.LoadFromFile('Images\backgroundStart.bmp');
 
   mapGraph.hashFunc := matrixHashFunc;
   mapGraph.height := 0;

@@ -55,7 +55,6 @@ function getTheShortestWayThroughSeveralPoints(point: array of TVertexPt;
   // func return does way exist or not
   // O(n^2 * 2^n + n^2 * O(getTheShortestWay))  // memory O(n * 2^n)
 function correctVertexId(elt: TEltPt; key: array of Variant): boolean;
-//function
 
 //----------------------------------------------------------------------------//
 
