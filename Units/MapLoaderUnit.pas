@@ -66,7 +66,6 @@ begin
   minLon := 180;
   result := true;
   try
-    clear(mapGraph);
     vertList := createHashList(standartHashFunc);
     Assign(f, fileName);
     Reset(f);

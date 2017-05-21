@@ -1,11 +1,5 @@
 unit DrawUnit;
 
-
-
-////////////  CLEAR EDGES !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-
-
 //----------------------------------------------------------------------------//
 
 interface                   
@@ -678,6 +672,9 @@ end;
 
 procedure TForm1.ReselectMapBtnClick(Sender: TObject);
 begin
+  clearMap(mapGraph);
+  way := nil;
+  points := nil;
   makeStartPage;
 end;
 
@@ -758,6 +755,11 @@ procedure TForm1.FormCanResize(Sender: TObject; var NewWidth,
 var
   x, xm, y, ym: integer;
 begin
+  {with Form1.Constraints do
+  begin
+    if NewWidth < minWidth then NewWidth := minWidth;
+    if NewHeight < minHeight then NewHeight := minHeight;
+  end;}
   xm := mapImage.Width;    //                                     /\
   x := NewWidth;           //  copying from mousemove procedure   |
   ym := mapImage.Height;   //

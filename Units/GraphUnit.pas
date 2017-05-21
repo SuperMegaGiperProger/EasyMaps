@@ -27,12 +27,12 @@ type
     endPoint: TVertexPt;
   end;
   TEdgePt = ^TEdge;
-  TGraphList = THashMatrix;  // list of TVertex
+  TMap = THashMatrix;  // list of TVertex
 
 const
   INF = 1000000000;  // infinity way
 var
-  mapGraph: TGraphList;  // main map graph
+  mapGraph: TMap;  // main map graph
   vertexNum: Int64 = 0;
   EdgeNum: Int64 = 0;
 
@@ -55,6 +55,7 @@ function getTheShortestWayThroughSeveralPoints(point: array of TVertexPt;
   // func return does way exist or not
   // O(n^2 * 2^n + n^2 * O(getTheShortestWay))  // memory O(n * 2^n)
 function correctVertexId(elt: TEltPt; key: array of Variant): boolean;
+procedure clearMap(map: TMap);
 
 //----------------------------------------------------------------------------//
 
@@ -62,6 +63,25 @@ implementation
 
 uses
   DrawUnit;
+
+procedure clearMap(map: TMap);
+var
+  i, j: integer;
+  it: TListOfPointers;
+begin
+  with map do
+    for i := 0 to height - 1 do
+      for j := 0 to width - 1 do
+      begin
+        it := table[i][j];
+        while it <> nil do
+        begin
+          clear(TVertexPt(it^.data)^.edgesList);
+          it := it^.next;
+        end;
+        clear(table[i][j]);
+      end;
+end;
 
 function correctVertexId(elt: TEltPt; key: array of Variant): boolean;
 begin
