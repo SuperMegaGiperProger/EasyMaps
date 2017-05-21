@@ -53,6 +53,7 @@ type
     ColorGridArrow: TColorGrid;
     ImageBack: TImage;
     Label3: TLabel;
+    CheckBoxOrder: TCheckBox;
     procedure LoadBtnClick(Sender: TObject);
     procedure mapImageMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
@@ -421,19 +422,47 @@ begin
 end;
 
 procedure drawTheShortestWayTroughSeveralPoints(point: array of TVertexPt;
-  start: boolean = false; finish: boolean = false;
+  start: boolean = false; finish: boolean = false; order: boolean = false;
   movingTypeSet: TMovingTypeSet = [car, foot, plane]);
 var
-  dist: real;
+  dist, distPart: real;
   exist: boolean;
+  wayPart, it: TListOfPointers;
+  i: integer;
 begin
-  Form1.Gauge.Visible := true;
-  exist := getTheShortestWayThroughSeveralPoints(point, dist, way, start, finish, movingTypeSet);
-  Form1.Gauge.Visible := false;
+  way := nil;
+  if length(points) < 2 then exit;
+  exist := true;
+  if order then
+  begin
+    if not getTheShortestWay(points[0], points[1], distPart, wayPart,
+      movingTypeSet) then exist := false;
+    dist := distPart;
+    push_back(way, wayPart);
+    it := way;
+    drawWay(way);
+    drawWay(way, true);
+    for i := 1 to length(points) - 2 do
+    begin
+      if not getTheShortestWay(points[i], points[i + 1], distPart, wayPart,
+        movingTypeSet) then exist := false;
+      dist := dist + distPart;
+      push_back(it^.next, wayPart);
+      drawWay(it);
+      drawWay(it, true);
+    end;
+  end
+  else
+  begin
+    Form1.Gauge.Visible := true;
+    exist := getTheShortestWayThroughSeveralPoints(point, dist, way, start, finish, movingTypeSet);
+    Form1.Gauge.Visible := false;
+  end;
   if not exist then
   begin
     Form1.LabelDist.Caption := 'INF';
     ShowMessage('ѕуть не найден');
+    way := nil;
     exit;
   end;
   Form1.LabelDist.Caption := IntToStr(round(dist * 1000));
@@ -543,13 +572,16 @@ end;
 procedure TForm1.BitBtn2Click(Sender: TObject);
 var
   movSet: TMovingTypeSet;
+  i: integer;
+  wayPart: TListOfPointers;
+  dist: real;
+  distPart: real;
 begin
-  way := nil;
   movSet := [];
   if CheckBoxFoot.Checked then Include(movSet, foot);
   if CheckBoxCar.Checked then Include(movSet, car);
   drawTheShortestWayTroughSeveralPoints(points, CheckBoxStart.Checked,
-    CheckBoxFinish.Checked, movSet);
+    CheckBoxFinish.Checked, CheckBoxOrder.Checked, movSet);
 end;
 
 //////////////////////// SCALE ////////////////////////////
