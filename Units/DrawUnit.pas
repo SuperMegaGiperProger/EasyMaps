@@ -500,12 +500,12 @@ begin
   begin
     //if not ((x0 > rightBorder - Width) or (x0 < leftBorder)) then
     x0 := x0 + (xm - x) * scale;
-    minimize(x0, rightBorder - Width * scale);
-    maximize(x0, leftBorder);
+    minimize(x0, rightBorder);
+    maximize(x0, leftBorder - width * scale);
     //if not ((y0 > topBorder) or (y0 < bottomBorder + Height)) then
     y0 := y0 - (ym - y) * scale;
-    minimize(y0, topBorder);
-    maximize(y0, bottomBorder + Height * scale);
+    minimize(y0, topBorder + Height * scale);
+    maximize(y0, bottomBorder);
   end;
   //drawFullGraph;
   with Form1.mapImage do
