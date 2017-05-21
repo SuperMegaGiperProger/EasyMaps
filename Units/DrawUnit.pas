@@ -2,7 +2,7 @@ unit DrawUnit;
 
 //----------------------------------------------------------------------------//
 
-interface                   
+interface
 
 uses
   HashUnit, GeoUnit, MapLoaderUnit, GraphUnit, listOfPointersUnit,
@@ -142,7 +142,7 @@ begin
   if v = nil then exit;
   SetLength(points, length(points) + 1);
   points[length(points) - 1] := v;
-  way := nil;
+  clear(way);
   DrawFullGraph;
 end;
 
@@ -157,7 +157,7 @@ begin
   for i := i + 1 to n - 1 do
     points[i - 1] := points[i];
   SetLength(points, n - 1);
-  way := nil;
+  clear(way);
   DrawFullGraph;
 end;
 
@@ -200,7 +200,7 @@ end;
 procedure TForm1.BitBtn4Click(Sender: TObject);  // delete all
 begin
   points := nil;
-  way := nil;
+  clear(way);
   DrawFullGraph;
   pointAddition := true;
 end;
@@ -430,7 +430,7 @@ var
   wayPart, it: TListOfPointers;
   i: integer;
 begin
-  way := nil;
+  clear(way);
   drawFullGraph;
   if length(points) < 2 then exit;
   exist := true;
@@ -465,7 +465,7 @@ begin
   begin
     Form1.LabelDist.Caption := 'INF';
     ShowMessage('ѕуть не найден');
-    way := nil;
+    clear(way);
     exit;
   end;
   Form1.LabelDist.Caption := IntToStr(round(dist * 1000));
@@ -575,10 +575,6 @@ end;
 procedure TForm1.BitBtn2Click(Sender: TObject);
 var
   movSet: TMovingTypeSet;
-  i: integer;
-  wayPart: TListOfPointers;
-  dist: real;
-  distPart: real;
 begin
   movSet := [];
   if CheckBoxFoot.Checked then Include(movSet, foot);
@@ -708,7 +704,7 @@ end;
 procedure TForm1.ReselectMapBtnClick(Sender: TObject);
 begin
   clearMap(mapGraph);
-  way := nil;
+  clear(way);
   points := nil;
   makeStartPage;
 end;
