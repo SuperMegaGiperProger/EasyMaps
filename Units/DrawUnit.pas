@@ -431,6 +431,7 @@ var
   i: integer;
 begin
   way := nil;
+  drawFullGraph;
   if length(points) < 2 then exit;
   exist := true;
   if order then
@@ -450,12 +451,14 @@ begin
       push_back(it^.next, wayPart);
       drawWay(it);
       drawWay(it, true);
+      Form1.Repaint;
     end;
   end
   else
   begin
     Form1.Gauge.Visible := true;
-    exist := getTheShortestWayThroughSeveralPoints(point, dist, way, start, finish, movingTypeSet);
+    exist := getTheShortestWayThroughSeveralPoints(point, dist, way, start,
+      finish, movingTypeSet);
     Form1.Gauge.Visible := false;
   end;
   if not exist then
