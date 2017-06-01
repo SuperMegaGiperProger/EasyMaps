@@ -54,6 +54,10 @@ type
     ImageBack: TImage;
     Label3: TLabel;
     CheckBoxOrder: TCheckBox;
+    OpenDialog1: TOpenDialog;
+    GroupBox4: TGroupBox;
+    LabelLat: TLabel;
+    LabelLon: TLabel;
     procedure LoadBtnClick(Sender: TObject);
     procedure mapImageMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
@@ -484,6 +488,8 @@ var
 begin
   if not move then
   begin
+    LabelLat.Caption := Format('%.7f', [getLatitude(-y * scale + y0)]);
+    LabelLon.Caption := Format('%.7f', [getLongitude(x * scale + x0)]);
     if lastPointV <> nil then clearPoint(getX(lastPointV^.longitude),
       getY(lastPointV^.latitude));
     lastPointV := findClosestVertex(x, y);
@@ -721,20 +727,27 @@ end;
 procedure TForm1.LoadBtnClick(Sender: TObject);
 var
   filename: string;
+  source: boolean;
 begin
   if not (CheckBoxCarLoad.Checked or CheckBoxFootLoad.Checked) then
   begin
     ShowMessage('Выберите хотя бы один тип дорог');
     exit;
   end;
+  source := true;
   case ComboBoxCity.ItemIndex of
-    4: filename := 'minsk';
-    1: filename := 'glasgow_scotland';
-    2: filename := 'kyiv_ukraine';
-    3: filename := 'las-vegas_nevada';
-    5: filename := 'riga_latvia';
-    6: filename := 'singapore';
-    0: filename := 'map';
+    4: filename := ExtractFileDir(Application.ExeName) + '\Map\minsk.txt';
+    0: filename := ExtractFileDir(Application.ExeName) + '\Map\glasgow_scotland.txt';
+    2: filename := ExtractFileDir(Application.ExeName) + '\Map\kyiv_ukraine.txt';
+    3: filename := ExtractFileDir(Application.ExeName) + '\Map\las-vegas_nevada.txt';
+    5: filename := ExtractFileDir(Application.ExeName) + '\Map\riga_latvia.txt';
+    6: filename := ExtractFileDir(Application.ExeName) + '\Map\singapore.txt';
+    1: if openDialog1.Execute then
+      begin
+        filename := OpenDialog1.FileName;
+        source := false;
+      end
+      else exit;
     else
       begin
         ShowMessage('Выберите город');
@@ -746,10 +759,17 @@ begin
   Form1.Label3.Visible := true;
   ComboBoxCity.Visible := false;
   Form1.Repaint;
-  LoadMapFromFile('Map\' + filename + '.txt', CheckBoxCarLoad.Checked,
-    CheckBoxFootLoad.Checked);
+  if not LoadMapFromFile(filename, CheckBoxCarLoad.Checked,
+    CheckBoxFootLoad.Checked) then
+  begin
+    clearMap(mapGraph);
+    makeStartPage;
+    exit;
+  end;
   DrawFullGraph;
   setComponentsVisible;
+  Label1.Visible := source;
+  Label2.Visible := source;
   LoadBtn.Visible := false;
   GroupBoxLoad.Visible := false;
   Label3.Visible := False;

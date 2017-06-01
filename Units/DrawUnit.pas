@@ -54,6 +54,10 @@ type
     ImageBack: TImage;
     Label3: TLabel;
     CheckBoxOrder: TCheckBox;
+    GroupBox4: TGroupBox;
+    LabelLon: TLabel;
+    LabelLat: TLabel;
+    OpenDialog1: TOpenDialog;
     procedure LoadBtnClick(Sender: TObject);
     procedure mapImageMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
@@ -485,6 +489,8 @@ var
 begin
   if not move then
   begin
+    LabelLat.Caption := Format('%.7f', [getLatitude(-y * scale + y0)]);
+    LabelLon.Caption := Format('%.7f', [getLongitude(x * scale + x0)]);
     if lastPointV <> nil then clearPoint(getX(lastPointV^.longitude),
       getY(lastPointV^.latitude));
     lastPointV := findClosestVertex(x, y);
@@ -718,20 +724,24 @@ end;
 procedure TForm1.LoadBtnClick(Sender: TObject);
 var
   filename: string;
+  source: boolean;
 begin
   if not (CheckBoxCarLoad.Checked or CheckBoxFootLoad.Checked) then
   begin
     ShowMessage('Выберите хотя бы один тип дорог');
     exit;
   end;
+  source := true;
   case ComboBoxCity.ItemIndex of
-    2: filename := 'minsk';
-    5: filename := 'glasgow_scotland';
-    4: filename := 'kyiv_ukraine';
-    3: filename := 'las-vegas_nevada';
-    1: filename := 'riga_latvia';
-    0: filename := 'singapore';
-    6: filename := 'map';
+    2: filename := ExtractFileDir(Application.ExeName) + '\Map\minsk.txt';
+    6: filename := ExtractFileDir(Application.ExeName) + '\Map\glasgow_scotland.txt';
+    4: filename := ExtractFileDir(Application.ExeName) + '\Map\kyiv_ukraine.txt';
+    3: filename := ExtractFileDir(Application.ExeName) + '\Map\las-vegas_nevada.txt';
+    1: filename := ExtractFileDir(Application.ExeName) + '\Map\riga_latvia.txt';
+    0: filename := ExtractFileDir(Application.ExeName) + '\Map\singapore.txt';
+    7: filename := ExtractFileDir(Application.ExeName) + '\Map\map.txt';
+    5: if openDialog1.Execute then
+      begin        filename := OpenDialog1.FileName;        source := false;      end      else exit;
     else
       begin
         ShowMessage('Выберите город');
@@ -743,10 +753,12 @@ begin
   Form1.Label3.Visible := true;
   ComboBoxCity.Visible := false;
   Form1.Repaint;
-  LoadMapFromFile('Map\' + filename + '.txt', CheckBoxCarLoad.Checked,
+  LoadMapFromFile(filename, CheckBoxCarLoad.Checked,
     CheckBoxFootLoad.Checked);
   DrawFullGraph;
   setComponentsVisible;
+  Label1.Visible := source;
+  Label2.Visible := source;
   LoadBtn.Visible := false;
   GroupBoxLoad.Visible := false;
   Label3.Visible := False;
@@ -841,7 +853,7 @@ begin
   ComboBoxCity.Top := (NewHeight - ComboBoxCity.Height) div 2;
   GroupBoxLoad.Left := (NewWidth - GroupBoxLoad.Width) div 2 +
     ComboBoxCity.Width + 20;
-  GroupBoxLoad.Top := ComboBoxCity.Top;
+  GroupBoxLoad.Top := LoadBtn.Top;
 end;
 
 ///////////////////////// SOURCE LINK /////////////////////////////////

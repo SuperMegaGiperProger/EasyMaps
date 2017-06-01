@@ -148,7 +148,7 @@ begin
   minimize(k, 1 / MIN_CELL_CAPARCITY);
   w := w * k;
   h := h * k;
-  mapGraph := CreateHashMatrix(trunc(h), trunc(w), trunc(k),
+  mapGraph := CreateHashMatrix(trunc(h) + 1, trunc(w) + 2, trunc(k),
     leftBorder, bottomBorder, matrixHashFunc);
   //// filling in matrix
   for i := 0 to vertList.size - 1 do
