@@ -9,9 +9,12 @@ couriers), set point order or optimize it.
 
 ##### Menu
 ![Startup menu image](docs/startup.png)
-##### Way with defined start and finish
-![Some way with defined start and finish image](docs/way_start_end.png)
-##### The same way with optimized start and finish
+![Startup load image](docs/startup_load.png)
+##### Way with defined order
+![Way with defined order image](docs/way_order.png)
+##### The same way with defined start and finish but optimized order
+![Some way with defined start and finish image](docs/way_start_finish.png)
+##### The same way with optimized order
 ![Way with optimized start and finish image](docs/way.png)
 ##### Settings
 ![Settings image](docs/settings.png)
