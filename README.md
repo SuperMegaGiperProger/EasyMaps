@@ -1,8 +1,8 @@
 # EasyMaps
 
-**Easy Maps** is an offline desktop application for Windows written in Delphi. It helps you to calculate the shortiest
+**Easy Maps** is an offline desktop application for Windows written in Delphi. It helps you to calculate the shortest
 way between several(<= 25) points on a map and optimize points order. Maps are stored in text format. There are 
-2 movement types: by foot and by car. The app allows you to choose start or end point or optimize it (usefull for
+2 movement types: by foot and by car. The app allows you to choose start or end point or optimize it (useful for
 couriers), set point order or optimize it.
 
 *The app was run in [wine](http://www.winehq.org/) during the development period.*
