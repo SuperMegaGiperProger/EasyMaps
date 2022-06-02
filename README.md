@@ -7,21 +7,21 @@ couriers), set point order or optimize it.
 
 *The app was run in [wine](http://www.winehq.org/) during the development period.*
 
-##### Menu
+##### Menu (user can upload any map)
 ![Startup menu image](docs/startup.png)
 ![Startup load image](docs/startup_load.png)
-##### Way with defined order
+##### Way with defined fixed order of points. Also user can choose movement type - on foot/by car.
 ![Way with defined order image](docs/way_order.png)
-##### The same way with defined start and finish but optimized order
+##### The same way with defined start and finish but optimized order of intermediate points
 ![Some way with defined start and finish image](docs/way_start_finish.png)
-##### The same way with optimized order
+##### The same way with fully optimized order (it can change even the start and finish points)
 ![Way with optimized start and finish image](docs/way.png)
-##### Settings
+##### Settings (user can choose between map quality and performance)
 ![Settings image](docs/settings.png)
 ![Settings after image](docs/settings_after.png)
-##### Way with defined order
+##### Way with defined fixed order of points
 ![Way with defined order image](docs/way2_order.png)
-##### The same way with optimized order
+##### The same way with optimized order of points
 ![Way with optimized order](docs/way2.png)
 
 #### Map format
